@@ -1,0 +1,11 @@
+scikit_image==0.16.2
+opencv_python_headless==4.1.2.30
+tensorflow==1.15.0
+requests==2.23.0
+matplotlib==2.2.3
+numpy==1.17.3
+pandas==0.23.3
+Keras_Applications==1.0.8
+joblib==0.14.1
+tqdm==4.44.1
+PySimpleGUI==4.28.0
