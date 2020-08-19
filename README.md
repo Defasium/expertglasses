@@ -54,7 +54,7 @@ For the full list of requirements consider to check requirements.txt
 
 To install repository, use the following commands:
 
-    $ git clone https://github.com/Defasium/ExpertGlasses
+    $ git clone https://github.com/Defasium/expertglasses
     $ cd ExpertGlasses/
     $ sudo pip3 install -r requirements.txt
 
@@ -222,7 +222,7 @@ ____
 
 ## Sources
 
-For classifiers this system uses modified version of ShuffleNetV2, implemented by [@opcont](https://github.com/opconty/keras-shufflenetV2).
+For classifiers this system uses modified version of ShuffleNetV2, implemented by [@opconty](https://github.com/opconty/keras-shufflenetV2).
 
 For upscaling generated images this system uses modified version of [@krasserm](https://github.com/krasserm/super-resolution) Super Resolution GAN implementation.
 
