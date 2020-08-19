@@ -1,7 +1,7 @@
 # ExpertGlasses
 
 <p align="center">
-  <img src="assets/title.png" alt="title"/>    
+  <img src="assets/schema.jpg" alt="title" width="100%"/>    
 </p>
 
 Expert eyeglasses recommendation system with Generative Adversarial Networks written in Python, 2020.
@@ -30,17 +30,11 @@ To detect face shape probabilities, iris color, forehead size, jawtype type, ski
 
 To get all necessary eyeframes attributes, the large dataset (>8k records) of eyeframes was parsed and processed. Because in real life there are not so many eyeframe models in the local shop available, the generation of unique eyewear by given features was implemented. The system use a conditional GAN followed by Super Resolution GAN to create non-existing high-definition images of the eyeframes.
 
-Step-by-step illustration of implemented system:
-
-<p align="center">
-  <img src="assets/schema.jpg" alt="title" width="100%"/>    
-</p>
-
 ____
 
 ## Installation
 Requirements:
-* Python 3.7 or greater
+* Python 3.6 or greater
 * requests
 * numpy
 * pandas
@@ -55,7 +49,7 @@ For the full list of requirements consider to check requirements.txt
 To install repository, use the following commands:
 
     $ git clone https://github.com/Defasium/expertglasses
-    $ cd ExpertGlasses/
+    $ cd expertglasses/
     $ sudo pip3 install -r requirements.txt
 
 ## Reminder about API-services
