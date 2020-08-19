@@ -100,27 +100,27 @@ Download 2 files, __cgan.h5__ and __srgan.h5__, and place them in __utils/__ dir
 | <img title="DropBox" src="https://cfl.dropboxstatic.com/static/images/logo_catalog/logo_m1.png" width="50px"/>|[DropBox](https://www.dropbox.com/s/s00vugkaau9twcs/abtest.zip?dl=0)|
 | <img title="Mega" src="https://mega.nz/favicon.ico?v=3" width="50px"/>|[Mega](https://mega.nz/folder/Bt9SRKqI#sjmJPOKF2VWgNxgt80ItmQ)|
 
-Download files, create a directory named "abtest/" and extract "man" and "woman" directories inside of it.
+Download files, create a directory named __abtest/__ and extract __man/__ and __woman/__ directories inside of it.
 
 ## How to use ExpertGlasses
 
-At the current state there are 2 ways of using expert eyeglasses recommender system: in your python code and in via GUI.
+At the current state there are only 2 ways of using expert eyeglasses recommender system: in your python code and via GUI.
 
 ### In code
 
-To use this system, you simply import class in your python code:
+To use this system, simply import class in your python code:
 ```Python
 from expert_backend import ExpertEyeglassesRecommender
 ```
 
-After that you create an instance of this class with specified path to the image:
+After that create an instance of this class with a specified path to the image:
 ```Python
 ins = ExpertEyeglassesRecommender('test.jpg')
 ```
 Initialization of class may take quite a long time (from 30 second up to 2 minutes). 
 ____
 
-After initialization your recomendations will be completed and you can get top 6 best images of eyeglasses in the following way:
+After initialization recomendations will be completed and to get the top 6 best images of eyeglasses use:
 ```Python
 ins.plot_recommendations()
 ```
