@@ -174,7 +174,7 @@ class ExpertEyeglassesRecommender:
         self._models_path = 'models/'
 
         # for each pretrained model construct necessary architecture and load weights
-        for model in os.listdir(self._models_path):
+        for model in sorted(os.listdir(self._models_path)):
             if self._logger is not None:
                 self._logger.info('Loading model: %s', model)
             # TODO; change string methods to regex patterns
