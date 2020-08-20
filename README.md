@@ -202,21 +202,26 @@ ____
 
 In this section you can find information about current performance of the system, speed benchmarks and so on.
 
-On Windows 10 with 4 cores 2.3 GHZ Intel® Core™ i5-4200U and 4 GB of RAM:
+Speed benchmarks were tested on 2 different machines:
+ * Windows 10 with 4 cores 2.3 GHz Intel® Core™ i5-4200U and 4 GB of RAM (low spec)
+ * Linux Ubuntu 16.04 LTS with 4 cores 3.4 GHz Intel® Core™ i7-4770 and 20 GB of RAM (high spec)
 
-|Action|Time|Standart deviation|
-|:--------------|:--:|---:|
-|Image alignment|4.7s|2.4s|
-|Cached image alignment|62.0ms|55.0ms|
-|BetaFace api request|1.5s|0.4s|
-|Cached betaFace api request|2.0μs|0.2μs|
-|Extraction of facial attributes|2.7s|1.6s|
-|Cached extraction of facial attributes|3.0μs|0.1μs|
-|Features translation|0.78s|0.62s|
-|Cached features translatio|15.0μs|12.1μs|
-|Database search with cosine distances|1.1s|0.4s|
-|Unique eyeglasses generation|4.2s|0.2s|
-|Initialization of class instance|44.7s|1.9s|
+The results are listed below:
+ 
+
+|Action|Time, low spec|Time, high spec|Standart deviation, low spec|Standart deviation, high spec|
+|:--------------|:--:|:--:|---:|---:|
+|Image alignment|4.7s|__3.9s__|2.4s|__0.5s__|
+|Cached image alignment|62.0ms|__39.1ms__|55.0ms|__5.7ms__|
+|BetaFace api request|__1.5s__|1.6s|0.4s|__0.4s__|
+|Cached betaFace api request|2.0μs|__0.7μs__|__0.2μs__|0.3μs|
+|Extraction of facial attributes|2.7s|__2.3s__|1.6s|__1.2s__|
+|Cached extraction of facial attributes|3.0μs|__2.4μs__|__0.1μs__|1.8μs|
+|Features translation|0.78s|__0.11s__|0.62s|__0.54s__|
+|Cached features translation|15.0μs|__3.2μs__|12.1μs|__1.6μs__|
+|Database search with cosine distances|1.1s|__0.8s__|0.4s|__0.4s__|
+|Unique eyeglasses generation|4.2s|__4.0s__|__0.2s__|1.4s|
+|Initialization of class instance|44.7s|__27.2s__|__1.9s__|2.7s|
 
 ____
 
