@@ -48,9 +48,24 @@ For the full list of requirements consider to check requirements.txt
 
 To install repository, use the following commands:
 
+__`Windows`__:
+
+    $ git clone https://github.com/Defasium/expertglasses
+    $ cd expertglasses/
+    $ pip3 install -r requirements.txt
+
+__`Linux`__:
+
     $ git clone https://github.com/Defasium/expertglasses
     $ cd expertglasses/
     $ sudo pip3 install -r requirements.txt
+
+__`Linux`__ inside virtualenv:
+
+    $ git clone https://github.com/Defasium/expertglasses
+    $ cd expertglasses/
+    $ pip3 install -r requirements.txt
+
 
 ## Reminder about API-services
 
@@ -90,9 +105,9 @@ Download 2 files, __cgan.h5__ and __srgan.h5__, and place them in __utils/__ dir
 ### Download images for A/B testing
 | Storage Service | Link |
 | ---- | ----------- |
-| <img title="GDrive" src="http://ssl.gstatic.com/docs/doclist/images/infinite_arrow_favicon_5.ico" width="50px"/>|[GDrive](https://drive.google.com/file/d/1aL60K5BX1kXQuM5xJC_jg9VMorPgotpL)|
-| <img title="DropBox" src="https://cfl.dropboxstatic.com/static/images/logo_catalog/logo_m1.png" width="50px"/>|[DropBox](https://www.dropbox.com/s/s00vugkaau9twcs/abtest.zip?dl=0)|
-| <img title="Mega" src="https://mega.nz/favicon.ico?v=3" width="50px"/>|[Mega](https://mega.nz/folder/Bt9SRKqI#sjmJPOKF2VWgNxgt80ItmQ)|
+| <p align="center"><img title="GDrive" src="http://ssl.gstatic.com/docs/doclist/images/infinite_arrow_favicon_5.ico" width="50px"/></p>|[GDrive](https://drive.google.com/file/d/1aL60K5BX1kXQuM5xJC_jg9VMorPgotpL)|
+| <p align="center"><img title="DropBox" src="https://cfl.dropboxstatic.com/static/images/logo_catalog/logo_m1.png" width="50px"/></p>|[DropBox](https://www.dropbox.com/s/s00vugkaau9twcs/abtest.zip?dl=0)|
+| <p align="center"><img title="Mega" src="https://mega.nz/favicon.ico?v=3" width="50px"/></p>|[Mega](https://mega.nz/folder/Bt9SRKqI#sjmJPOKF2VWgNxgt80ItmQ)|
 
 Download files, create a directory named __abtest/__ and extract __man/__ and __woman/__ directories inside of it.
 
