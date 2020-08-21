@@ -27,7 +27,7 @@ The system use conditional GANs followed by Super Resolution GAN to create non-e
 high-definition images of the eyeframes.
 
 At the current state expert recommendation system has already implemented:
-    * Loading and updating the images with faces
+    * Loading and updating the images with faces from file system or URLs
     * Extraction of facial attributes from the image
     * Explanation module, which helps to understand, how reccomendations are formed
     * Visualization of top-6 most corresponding eyeframes by shape, shape and color,
@@ -42,7 +42,7 @@ Examples:
     After that you create an instance of this class with specified path to the image:
         # ins = ExpertEyeglassesRecommender('test.jpg')
 
-    Initialization of class may take quite a long time (from 30 second up to 2 minutes)
+    Initialization of class may take quite a long time (from 20 second up to 2 minutes)
     After initialization your recomendations will be completed and you can get top 6
     best images of eyeglasses in the following way:
         # ins.plot_recommendations()
@@ -54,13 +54,16 @@ Examples:
         # ins.update_image('test2.jpg')
         # ins.expert_module()
 
+    You can also pass an url:
+        # ins.update_image('https://github.com/Defasium/expertglasses/blob/master/assets/gui.png?raw=true')
+        # ins.expert_module()
+
 Todo:
     * Add english version of the UI
     * Implementation of searching similar glasses
     * Implementation of initial preferences in style of eyeglasses
     * Implementation of simple eyeglasses try-on
     * Implementation of taking images from the web-camera
-    * Implementation of uploading photos from the internet by url
     * Train an eyebrow's shape classifier
     * Replace BetaFace service with own classifiers
 
@@ -90,7 +93,7 @@ from model_architecture import build_network
 from shufflenet_and_gans.common import resolve_single
 from shufflenet_and_gans.srgan import generator
 
-VERSION = __version__ = '0.2.0 Released 26-May-2020'
+VERSION = __version__ = '0.2.1 Released 22-August-2020'
 
 def change_hue(img, value):
     '''Changes saturation of an image multiple time of given value.
@@ -126,11 +129,17 @@ class ExpertEyeglassesRecommender:
 
     Attributes:
         database (pandas.DataFrame): Database with eyeglasses, with more than 8k records.
+        description (str): Explanation of created recommendations by given user.
         eyeglasses_shape_vector (numpy.ndarray): 31-dimensional feature vector, defining shape
         eyeglasses_color_vector (numpy.ndarray): 15-dimensional feature vector, defining color
-        description (str): Explanation of created recommendations by given user.
 
     '''
+    __slots__ = ['database', 'description', 'eyeglasses_shape_vector', 'eyeglasses_color_vector',
+                 'error_occured', 'error_message', '_request_num', '_vectors', '_logger',
+                 '_verbose', '_session', '_graph', '_prefix', '_face_vector', '_cache',
+                 '_hash', '_tags', '_models', '_shapevec', '_colorvec', '_precompcv1',
+                 '_precompcv2', '_precomp', '_features', '_eyes', '_saturated_eyes', '_image',]
+  
     def __init__(self, image, window=None, logger=None, verbose=False):
         '''Constructor of recomendation class. In constructor you should always define path
         to the photo with face
@@ -146,6 +155,14 @@ class ExpertEyeglassesRecommender:
         self._vectors = dict()
         self._logger = logger
         self._verbose = verbose
+        self._session = None#tf.Session()
+        self._session = None#tf.Session()
+        self._graph = None#tf.get_default_graph()
+        self._prefix = os.path.dirname(os.path.abspath(__file__))
+        self._face_vector = None
+        self.eyeglasses_shape_vector = None
+        self.eyeglasses_color_vector = None
+        self.description = ''
 
         # if there are cached results from last execution, load them in memory
         if os.path.exists('utils/cached.gz'):
@@ -169,9 +186,9 @@ class ExpertEyeglassesRecommender:
         if window is not None:
             window['progbar'].update_bar(20)
 
-        # loading models into RAM
+        # loading models into RAM, requiring ~400-600MB
         self._models = []
-        self._models_path = 'models/'
+        models_path = os.path.join(self._prefix, 'models/')
 
         # for each pretrained model construct necessary architecture and load weights
         for model in sorted(os.listdir(self._models_path)):
@@ -183,32 +200,40 @@ class ExpertEyeglassesRecommender:
             # 128x128x3 - > (128, 128, 3)
             input_shape = [int(s) for s in model.split('_')[-2].split('x')]
             # loading in RAM, so no OOM hapens
-            with tf.device('/cpu:0'):
-                network = build_network(input_shape, embed_size)
-                network.load_weights(os.path.join(self._models_path, model))
+            with self._graph.as_default():
+                with self._session.as_default():
+                    with tf.device('/cpu:0'):
+                        network = build_network(input_shape, embed_size)
+                        network.load_weights(os.path.join(models_path, model))
             self._models.append(network)
             if window is not None:
                 window['progbar'].update_bar(20 + 8 * len(self._models))
 
         # loading Conditional Generative Adversarial Network for eyeglasses generation
-        if os.path.exists('utils/cgan.h5'):
+        if os.path.exists(os.path.join(self._prefix, 'utils/cgan.h5')):
             if self._logger is not None:
                 self._logger.info('Loading model: conditional gan')
-            with tf.device('/cpu:0'):
-                # conditional gan
-                self._models.append(tf.keras.models.load_model('utils/cgan.h5'))
+            with self._graph.as_default():
+                with self._session.as_default():
+                    with tf.device('/cpu:0'):
+                        # conditional gan
+                        cgan = tf.keras.models.load_model(os.path.join(self._prefix,
+                                                                       'utils/cgan.h5'))
+                        self._models.append(cgan)
             if window is not None:
                 window['progbar'].update_bar(20 + 8 * len(self._models))
         else:
             self._models.append(None)
 
         # loading Super Resolution Generative Adversarial Network for upscaling
-        if os.path.exists('utils/srgan.h5'):
+        if os.path.exists(os.path.join(self._prefix, 'utils/srgan.h5')):
             if self._logger is not None:
                 self._logger.info('Loading model: super resolution gan')
-            with tf.device('/cpu:0'):
-                upscaler_gan = generator()
-                upscaler_gan.load_weights('utils/srgan.h5')
+            with self._graph.as_default():
+                with self._session.as_default():
+                    with tf.device('/cpu:0'):
+                        upscaler_gan = generator()
+                        upscaler_gan.load_weights(os.path.join(self._prefix, 'utils/srgan.h5'))
             self._models.append(upscaler_gan)  # super resolution gan
             if window is not None:
                 window['progbar'].update_bar(75)
@@ -221,9 +246,12 @@ class ExpertEyeglassesRecommender:
             window['progbar'].update_bar(90)
 
         # loading eyeframes with attributes
-        self.database = pd.read_csv('data/database.csv.gz', index_col=None)
-        self._shapevec = pd.read_csv('data/shape_vectors.csv.gz', index_col=None)
-        self._colorvec = pd.read_csv('data/color_vectors.csv.gz', index_col=None)
+        self.database = pd.read_csv(os.path.join(self._prefix, 'data/database.csv.gz'),
+                                    index_col=None)
+        self._shapevec = pd.read_csv(os.path.join(self._prefix, 'data/shape_vectors.csv.gz'),
+                                     index_col=None)
+        self._colorvec = pd.read_csv(os.path.join(self._prefix, 'data/color_vectors.csv.gz'),
+                                     index_col=None)
         if window is not None:
             window['progbar'].update_bar(93)
 
@@ -239,7 +267,7 @@ class ExpertEyeglassesRecommender:
 
     def save(self):
         '''Saving cached results to the disk'''
-        joblib.dump(self._cache, 'utils/cached.gz', 3, 4)
+        joblib.dump(self._cache, os.path.join(self._prefix, 'utils/cached.gz'), 3, 4)
 
     def __get_vecs(self) -> (np.ndarray, np.ndarray):
         '''Get eyeglasses vectors for the current image file. In case there are no
@@ -391,7 +419,7 @@ class ExpertEyeglassesRecommender:
             shape_dist = sub_df.dot(shapevec[:-1] / np.linalg.norm(shapevec[:-1]))
             return shape_dist, idx
 
-    def plot_recommendations(self, strategy='factorized', block=True):
+    def plot_recommendations(self, strategy='factorized', block=True, return_links=False):
         '''Plot top 6 eyeframes recommendations from database by given strategy.
 
                 Args:
@@ -400,6 +428,8 @@ class ExpertEyeglassesRecommender:
                     The default value is 'factorized'.
                     block (bool, optional): Block further command execution by matplotlib or not.
                     The default value is True
+                    return_links (bool, optional): If True then return links to recommended images.
+                    The default value is False
 
                 Returns:
                     None.
@@ -421,11 +451,16 @@ class ExpertEyeglassesRecommender:
             # sort by index and take 6 biggest values, i.e. the most similar
             top6 = idx[dist.argsort()[-6:][::-1]]
             ims = self.database.iloc[top6].image_link.tolist()
-        fig = plt.figure(figsize=(21, 14))
-        axes = fig.subplots(2, 3, sharex='col', sharey='row')
 
         # lambda function for converting image links to the necessary format
         pretty = lambda x: 'http:' + x if x[0] == '/' else x
+
+        # if interested in image-links only, simply return them
+        if return_links:
+            return [pretty(img) for img in ims]
+
+        fig = plt.figure(figsize=(21, 14))
+        axes = fig.subplots(2, 3, sharex='col', sharey='row')
 
         # two rows
         for i in range(2):
@@ -450,7 +485,9 @@ class ExpertEyeglassesRecommender:
         '''Update current image in the system by given image path.
 
                 Args:
-                    image (str): path to the image file.
+                    image (str of file obj): A filename or URL (string), pathlib. Path object or a file object. 
+                    The file object must implement read(), seek(), and tell()
+                    methods, and be opened in binary mode.
 
                 Returns:
                     None.
@@ -461,7 +498,11 @@ class ExpertEyeglassesRecommender:
             print('[INFO] Updating new image...')
         if self._logger is not None:
             self._logger.info('Updating new image...')
-        self._image = cv2.imread(image, cv2.IMREAD_COLOR)
+
+        if isinstance(image, str):
+            self._image = io.imread(image)[:, :, ::-1]
+        else:
+            self._image = np.array(Image.open(image))[:, :, ::-1]
 
         # hash is the string represantation of the downscaled image
         self._hash = str(list(cv2.resize(self._image, (32, 32))))
@@ -748,7 +789,9 @@ class ExpertEyeglassesRecommender:
         bface = self.__clone_images()
 
         # get 7-dimensional embedding for each face
-        embed = self._models[1].predict(bface)
+        with self._graph.as_default():
+            with self._session.as_default():
+                embed = self._models[1].predict(bface)
 
         # clear some memory
         del bface
@@ -790,9 +833,9 @@ class ExpertEyeglassesRecommender:
 
     def __get_faceratio(self):
         ratio = self._features[1]['l_center'] / self._features[1]['w_center']
-        if ratio > 1.46:
+        if ratio > 1.36:
             return 'longer'
-        if ratio >= 1.28:
+        if ratio >= 1.18:
             return 'normal'
         return 'wider'
 
@@ -801,10 +844,12 @@ class ExpertEyeglassesRecommender:
         bface = self.__clone_images()
 
         # get embeddings for augmented images from neural network
-        embed = self._models[3].predict(bface)
+        with self._graph.as_default():
+            with self._session.as_default():
+                embed = self._models[3].predict(bface)
 
         # load gaussian mixture model and mapping dictionary
-        gmm, mapping = joblib.load('utils/jawgmm')
+        gmm, mapping = joblib.load(os.path.join(self._prefix, 'utils/jawgmm'))
         return mapping[np.argmax(gmm.predict_proba(embed).sum(axis=0))]
 
     def __get_beard(self):
@@ -837,9 +882,9 @@ class ExpertEyeglassesRecommender:
         thickness = ((right_eyebrow_ly['y'] - right_eyebrow_uy['y'] +
                       left_eyebrow_ly['y'] - left_eyebrow_uy['y'])
                      / (2 * length) - 0.0025) / 5.3e-5
-        if thickness > 2.0:
+        if thickness > 1.0:
             return 'thick'
-        if thickness > -2.0:
+        if thickness > -3.0:
             return 'normal'
         return 'thin'
 
@@ -877,10 +922,12 @@ class ExpertEyeglassesRecommender:
         beyes = np.array(beyes)
 
         # get embeddings for augmented and horizontally flipped images from neural network
-        embed = eyes_model.predict(np.concatenate([beyes, beyes[:, :, ::-1]]))
+        with self._graph.as_default():
+            with self._session.as_default():
+                embed = eyes_model.predict(np.concatenate([beyes, beyes[:, :, ::-1]]))
 
         # load gaussian mixture model and mapping dictionary
-        gmm, mapping = joblib.load('utils/eyesgmm')
+        gmm, mapping = joblib.load(os.path.join(self._prefix, 'utils/eyesgmm'))
         return mapping[np.argmax(gmm.predict_proba(embed).sum(axis=0))]
 
     def __get_forehead(self):
@@ -888,10 +935,12 @@ class ExpertEyeglassesRecommender:
         bface = self.__clone_images()
 
         # get embeddings for augmented images from neural network
-        embed = self._models[2].predict(bface)
+        with self._graph.as_default():
+            with self._session.as_default():
+                embed = self._models[2].predict(bface)
 
         # load gaussian mixture model and mapping dictionary
-        gmm, mapping = joblib.load('utils/fheadsgmm')
+        gmm, mapping = joblib.load(os.path.join(self._prefix, 'utils/fheadsgmm'))
         return mapping[np.argmax(gmm.predict_proba(embed).sum(axis=0))]
 
     def __get_bangs(self):
@@ -927,10 +976,12 @@ class ExpertEyeglassesRecommender:
         bface = self.__clone_images(color=True)
 
         # get embeddings for augmented images from neural network
-        embed = self._models[4].predict(bface)
+        with self._graph.as_default():
+            with self._session.as_default():
+                embed = self._models[4].predict(bface)
 
         # load gaussian mixture model and mapping dictionary
-        gmm, mapping = joblib.load('utils/skintonegmm')
+        gmm, mapping = joblib.load(os.path.join(self._prefix, 'utils/skintonegmm'))
         return mapping[np.argmax(gmm.predict_proba(embed).sum(axis=0))]
 
     def __get_race(self):
