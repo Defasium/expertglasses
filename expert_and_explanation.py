@@ -75,11 +75,11 @@ def translate_facevec2eyeglassesvec(facevector: dict, s_vector: np.ndarray, c_ve
             attention_on_other_shapes = 1
         if faceshape == 'oval':
             description += f'\tОвальная на {fraction*100:.1f}%\n'
-            description += '''\tТонкие оправы не лучший выбор (делают визуально шире),
-             в основном хороши все. Стоит обратить внимание на оправы квадратной формы, 
-            прямоугольной, авиаторы. Лучше избегать слишком больших и слишком мелких оправ.
-            Ободковые и полуободковые оправы - хороший выбор для вытянутого лица.
-            Любой цвет вам к лицу.\n'''
+            description += '\t\tТонкие оправы не лучший выбор (делают визуально шире), ' + \
+            'в основном хороши все. Стоит обратить внимание на оправы квадратной формы, ' + \
+            'прямоугольной, авиаторы. Лучше избегать слишком больших и слишком мелких оправ. ' + \
+            'Ободковые и полуободковые оправы - хороший выбор для вытянутого лица. ' + \
+            'Любой цвет вам к лицу.\n'
             s_vector[[0, 1, 4, 8]] += fraction * 2
             s_vector[[2, 3, 5, 6, 7, 9]] += fraction / 2
             s_vector[14] += fraction  # small and oversized are bad choice
@@ -91,10 +91,10 @@ def translate_facevec2eyeglassesvec(facevector: dict, s_vector: np.ndarray, c_ve
             c_vector += fraction
         elif faceshape == 'triangle':
             description += f'\tТреугольная на {fraction*100:.1f}%\n'
-            description += '''\tСтоит обратить внимание на оправы формы кошачий глаз,
-             клабмастеры, круглой. Тонкие металлические оправы или пластиковые - вам к лицу.
-            Лучше избегать оправ темных оттенков. Подходят легкие, светлые цвета. Также 
-            рассмотрите вариант прозрачных пластиковых оправ.\n'''
+            description += '\t\tСтоит обратить внимание на оправы формы кошачий глаз, ' + \
+            'клабмастеры, круглой. Тонкие металлические или пластиковые оправы - вам к лицу. ' + \
+            'Лучше избегать оправ темных оттенков. Подходят легкие, светлые цвета. Также ' + \
+            'рассмотрите вариант прозрачных пластиковых оправ.\n'
             s_vector[[3, 5, 7]] += fraction * 2 * attention_on_other_shapes
             s_vector[[0, 1, 2, 4]] += fraction / 2 * attention_on_other_shapes
             s_vector[[28]] += fraction * attention_on_other_shapes
@@ -104,10 +104,10 @@ def translate_facevec2eyeglassesvec(facevector: dict, s_vector: np.ndarray, c_ve
             c_vector[[9]] += fraction * attention_on_other_shapes / 3
         elif faceshape == 'oblong':
             description += f'\tВытянутая на {fraction*100:.1f}%\n'
-            description += '''\tСтоит обратить внимание на оправы круглой формы и
-             авиаторы. Для большей гармоничности рекомендуется рассмотреть оправы, вытянутые 
-            в высоту, нежели чем в ширину. Попробуйте оправы, у котрых цвет дужек отличается 
-            от основного цвета.\n'''
+            description += '\t\tСтоит обратить внимание на оправы круглой формы и ' + \
+            'авиаторы. Для большей гармоничности рекомендуется рассмотреть оправы, вытянутые ' + \
+            'в высоту, нежели в ширину. Попробуйте оправы, у которых цвет дужек отличается ' + \
+            'от основного цвета.\n'
             s_vector[[3, 4]] += fraction * 2
             s_vector[[2]] += fraction / 2
             s_vector[14] += fraction
@@ -117,11 +117,11 @@ def translate_facevec2eyeglassesvec(facevector: dict, s_vector: np.ndarray, c_ve
             c_vector[14] += fraction
         elif faceshape == 'heart':
             description += f'\tСердцевидная на {fraction*100:.1f}%\n'
-            description += '''\tУ вас заострённый подбородок. Для гармонии лучше выбирать
-             оправы, расширающиеся книзу. Поэкспериментируйте со стилем ретро. Стоит обратить 
-            внимание на оправы овальной формы, клабмастеры, авиаторы. Лучше избегать 
-            сужающихся и очень тонких моделей. Подходят легкие, светлые цвета, 
-            оттенки коричневого.\n'''
+            description += '\t\tУ вас заострённый подбородок. Для гармонии лучше выбирать ' + \
+            'оправы, расширающиеся книзу. Поэкспериментируйте со стилем ретро. Стоит обратить ' + \
+            'внимание на оправы овальной формы, клабмастеры, авиаторы. Лучше избегать ' + \
+            'сужающихся и очень тонких моделей. Подходят легкие, светлые цвета, ' + \
+            'оттенки коричневого.\n'
             s_vector[[2, 4, 7, 9]] += fraction * 2 * attention_on_other_shapes
             s_vector[[0, 1, 3]] += fraction / 2 * attention_on_other_shapes
             s_vector[[11, 12]] += fraction * attention_on_other_shapes
@@ -132,11 +132,11 @@ def translate_facevec2eyeglassesvec(facevector: dict, s_vector: np.ndarray, c_ve
             c_vector[[9]] += fraction / 3 * attention_on_other_shapes
         elif faceshape == 'diamond':
             description += f'\tРомбовидная на {fraction*100:.1f}%\n'
-            description += '''\tФорма лица редкая и сбалансированная. Чтобы подчеркнуть те
-             или иные черты, рассмотрите оправы формы кошачий гла, клабмастеры, овальные. 
-             Лучше избегать слишком больших и слишком мелких оправ. Лучше избегать 
-             расширяющихся книзу моделей. Рассмотрите вариант металлических полуободковых 
-             оправ. Подходят оттенки коричневого, черного. Оправы с темным верхом.\n'''
+            description += '\t\tФорма лица редкая и сбалансированная. Чтобы подчеркнуть те ' + \
+            'или иные черты, рассмотрите оправы формы кошачий гла, клабмастеры, овальные. ' + \
+            'Лучше избегать слишком больших и слишком мелких оправ. Лучше избегать ' + \
+            'расширяющихся книзу моделей. Рассмотрите вариант металлических полуободковых ' + \
+            'оправ. Подходят оттенки коричневого, черного. Оправы с темным верхом.\n'
             s_vector[[2, 4, 7]] += fraction * attention_on_other_shapes
             s_vector[[29]] += fraction * attention_on_other_shapes
             s_vector[[11]] += fraction * attention_on_other_shapes
@@ -147,10 +147,10 @@ def translate_facevec2eyeglassesvec(facevector: dict, s_vector: np.ndarray, c_ve
             c_vector[[1, 2, 13]] += fraction * attention_on_other_shapes
         elif faceshape == 'round':
             description += f'\tКруглая на {fraction*100:.1f}%\n'
-            description += '''\tСтоит обратить внимание на оправы формы кошачий глаз,
-             прямоугольные, квадратные и в целом угловатые. Лучше избегать круглых и овальных
-            оправ, невытянутых, а также толстых. Рассмотрите вариант моделей ободковых и 
-            полуободковых. Подходят оттенки коричневого, черного. Оправы с принтом.\n'''
+            description += '\t\tСтоит обратить внимание на оправы формы кошачий глаз, ' + \
+            'прямоугольные, квадратные и в целом угловатые. Лучше избегать круглых и овальных ' + \
+            'оправ, невытянутых, а также толстых. Рассмотрите вариант ободковых и ' + \
+            'полуободковых моделей. Подходят оттенки коричневого, черного. Оправы с принтом.\n'
             s_vector[[0, 1, 5, 9]] += fraction * 2 * attention_on_other_shapes
             s_vector[[2, 3]] -= fraction * 2 * attention_on_other_shapes
             s_vector[14] += fraction * attention_on_other_shapes
@@ -162,10 +162,10 @@ def translate_facevec2eyeglassesvec(facevector: dict, s_vector: np.ndarray, c_ve
             c_vector[[1, 2, 13]] += fraction * attention_on_other_shapes
         elif faceshape == 'square':
             description += f'\tКвадратная на {fraction*100:.1f}%\n'
-            description += '''\tСтоит обратить внимание на оправы круглой, овальной формы,
-             и в со сглаженными краями. Лучше избегать квардратных, прямоугольных, акцентирующих
-            внимание на челюсти моделей. Рассмотрите вариант широкихх пластиковых оправ.
-            Поэкспериментируйте с цветами, попробуйте яркие цвета.\n'''
+            description += '\t\tСтоит обратить внимание на оправы круглой, овальной формы, ' + \
+            'и со сглаженными краями. Лучше избегать квардратных, прямоугольных, ' + \
+            'акцентирующих внимание на челюсти, моделей. Рассмотрите вариант широких ' + \
+            'пластиковых оправ. Поэкспериментируйте с цветами, попробуйте яркие раскраски.\n'
             s_vector[[3]] += fraction * 2 * attention_on_other_shapes
             s_vector[[2, 5]] += fraction * attention_on_other_shapes
             s_vector[[0, 1]] -= fraction * 2 * attention_on_other_shapes
@@ -177,10 +177,10 @@ def translate_facevec2eyeglassesvec(facevector: dict, s_vector: np.ndarray, c_ve
             c_vector[[9]] += fraction / 3 * attention_on_other_shapes
         elif faceshape == 'rectangle':
             description += f'\tПрямоугольная на {fraction*100:.1f}%\n'
-            description += '''\tСтоит обратить внимание на оправы круглой формы,
-             авиаторы, оправы со сглаженными краями. Для большей гармоничности рекомендуется 
-            рассмотреть оправы, вытянутые в высоту, нежели чем в ширину. Попробуйте оправы, 
-            у котрых цвет дужек отличается от основного цвета.\n'''
+            description += '\t\tСтоит обратить внимание на оправы круглой формы, ' + \
+            'авиаторы, оправы со сглаженными краями. Для большей гармоничности рекомендуется ' + \
+            'рассмотреть оправы, вытянутые в высоту, нежели в ширину. Попробуйте оправы, ' + \
+            'у котрых цвет дужек отличается от основного цвета.\n'
             s_vector[[3, 4]] += fraction * attention_on_other_shapes
             s_vector[[2]] += fraction / 2 * attention_on_other_shapes
             s_vector[14] += fraction / 2 * attention_on_other_shapes
@@ -194,15 +194,18 @@ def translate_facevec2eyeglassesvec(facevector: dict, s_vector: np.ndarray, c_ve
     ##############################
     description += 'Пропорции лица:\n'
     if facevector['ratio'] == 'wider':
-        description += '''\tШире\n
-        \tПодойдут оправы, вытянутые в ширину.\n'''
+        description += '\tШире\n' + \
+        '\t\tПодойдут оправы, вытянутые в ширину.\n'
         s_vector[[10, 20]] += 2.0 * emphasize_coef
         s_vector[[15, 16]] -= 2.0 * emphasize_coef
     elif facevector['ratio'] == 'longer':
-        description += '''\tВыше\n
-        \tПодойдут оправы, вытянутые в высоту.\n'''
+        description += '\tВыше\n' + \
+        '\t\tПодойдут оправы, вытянутые в высоту.\n'
         s_vector[[20]] -= 2.0 * emphasize_coef
         s_vector[[14, 15]] += 2.0 * emphasize_coef
+    else:
+        description += '\tСбалансированные\n' + \
+        '\t\t\n'
 
     ##############################
     ########## Jawtype ###########
@@ -212,19 +215,19 @@ def translate_facevec2eyeglassesvec(facevector: dict, s_vector: np.ndarray, c_ve
         if facevector['jawtype'] == 'soft' or \
                         facevector['doublechin'] == 'yes' or \
                         facevector['chubby'] == 'yes':
-            description += '''\tМягкая\n
-            \tПодойдут оправы угловатой формы.\n'''
+            description += '\tМягкая\n' + \
+            '\t\tПодойдут оправы угловатой формы.\n'
             s_vector[[21]] += 2.0 * emphasize_coef
             s_vector[[2, 3, 5]] += 2.0 * emphasize_coef
         else:
-            description += '''\tВыраженная\n
-            \tПодойдут оправы со сглаженными краями.\n'''
+            description += '\tВыраженная\n' + \
+            '\t\tПодойдут оправы со сглаженными краями.\n'
             s_vector[[21]] -= 2.0 * emphasize_coef
             s_vector[[0, 1]] += 2.0 * emphasize_coef
     else:
-        description += '''\tПрисутствует борода\n
-        \tБорода смещает акцент вниз, рекомендуется рассмотреть 
-        сужающиеся книзу модели.\n'''
+        description += '\tПрисутствует борода\n' + \
+        '\t\tБорода смещает акцент вниз, рекомендуется рассмотреть ' + \
+        'сужающиеся книзу модели.\n'
         s_vector[[20]] += 1.0 * emphasize_coef
 
     ##############################
@@ -232,44 +235,45 @@ def translate_facevec2eyeglassesvec(facevector: dict, s_vector: np.ndarray, c_ve
     ##############################
     description += 'Брови:\n'
     if facevector['eyebrows_thickness'] == 'thick':
-        description += '''\tТолстые\n
-        \tОбодковые толстые оправы будут выглядеть с толстыми бровями комично.\n'''
+        description += '\tТолстые\n' + \
+        '\t\tОбодковые толстые оправы будут выглядеть с толстыми бровями комично.\n'
         s_vector[[11, 12]] += 1.0 * emphasize_coef
         s_vector[[22]] -= 1.0 * emphasize_coef
     elif facevector['eyebrows_thickness'] == 'thin':
-        description += '''\tТонкие\n
-        \tОбодковые толстые оправы подчеркнут область глаз.\n'''
+        description += '\tТонкие\n' + \
+        '\t\tОбодковые толстые оправы подчеркнут область глаз.\n'
         s_vector[[10]] += 1.0 * emphasize_coef
         s_vector[[22]] += 1.0 * emphasize_coef
 
+
     if facevector['eyebrows_shape'] == 'flat':
-        description += '''\tПлоская линия бровей\n'''
+        description += '\tПлоская линия бровей\n'
         s_vector[[23]] += 2.0 * emphasize_coef
     elif facevector['eyebrows_shape'] == 'curly':
-        description += '''\tЗакруглённая линия бровей\n'''
+        description += '\tЗакруглённая линия бровей\n'
         s_vector[[24, 25]] += 2.0 * emphasize_coef
     elif facevector['eyebrows_shape'] == 'roof':
-        description += '''\tЛиния бровей <<домиком>>\n'''
+        description += '\tЛиния бровей <<домиком>>\n'
         s_vector[[26]] += 2.0 * emphasize_coef
     elif facevector['eyebrows_shape'] == 'angry':
-        description += '''\tХмурая линия бровей\n'''
+        description += '\tХмурая линия бровей\n'
         s_vector[[27]] += 2.0 * emphasize_coef
-    description += '''\tФорма верхней части оправ должна повторять линию бровей\n'''
+    description += '\t\tФорма верхней части оправ должна повторять линию бровей\n'
     ##############################
     ############ Nose ############
     ##############################
     description += 'Размер Носа:\n'
     if facevector['nose_size'] == 'big':
-        description += '''\tКрупный\n
-            Сместить внимание с крупного носа помогут оправы толстой формы.
-            Отсутствие носоупоров сыграет на пользу.\n'''
+        description += '\tКрупный\n' + \
+            '\t\tСместить внимание с крупного носа помогут оправы толстой формы. ' + \
+            'Отсутствие носоупоров сыграет на пользу.\n'
         s_vector[[10]] += 1.0 * emphasize_coef
         s_vector[[22]] += 1.0 * emphasize_coef
         s_vector[[19]] -= 1.0 * emphasize_coef
     else:
-        description += '''\tНебольшой\n
-            Можно смело рассматривать модели с носоупорами.
-            Полуобоковые и безободковые оправы стоят рассмотрения.\n'''
+        description += '\tНебольшой\n' + \
+            '\t\tМожно смело рассматривать модели с носоупорами. ' + \
+            'Полуобоковые и безободковые оправы стоят рассмотрения.\n'
         s_vector[[11, 12]] += 0.25
         s_vector[[19]] += 1.0
 
@@ -278,9 +282,9 @@ def translate_facevec2eyeglassesvec(facevector: dict, s_vector: np.ndarray, c_ve
     ##############################
     description += 'Глаза:\n'
     if facevector['eyes_narrow'] == 'yes':
-        description += '''\tУзкий разрез глаз:\n
-            Для узкого разреза глаз лучше выбирать большие, не слишком толстые оправы.
-            Темные оттенки - не лучший выбор.\n'''
+        description += '\tУзкий разрез глаз:\n' + \
+            '\t\tДля узкого разреза глаз лучше выбирать большие, не слишком толстые оправы. ' + \
+            'Темные оттенки - не лучший выбор.\n'
         s_vector[[14, 15]] += 1.0 * emphasize_coef
         s_vector[[17, 18]] += 1.0 * emphasize_coef  # narrow eyes -> larger frames
         c_vector[[0, 1]] -= 1.0 * emphasize_coef
@@ -289,25 +293,25 @@ def translate_facevec2eyeglassesvec(facevector: dict, s_vector: np.ndarray, c_ve
         c_vector[[9]] += 0.3
 
     if facevector['eyes_iris'] == 'brown':
-        description += '''\tКарие\n
-            Подходят модели коричневых, синих, темнозеленых, светлых оттенков.
-            Также рассмотрите вариант прозрачных пластиковых оправ.\n'''
+        description += '\tКарие\n' + \
+            '\t\tПодходят модели коричневых, синих, темнозеленых, светлых оттенков. ' + \
+            'Также рассмотрите вариант прозрачных пластиковых оправ.\n'
         c_vector[[1, 3, 12, 13]] += 1.0
         c_vector[[9]] += 0.3
     elif facevector['eyes_iris'] == 'blue':
-        description += '''\tГолубые\n
-            Подходят модели голубых, синих, оранжевых, красных оттенков.
-            Также рассмотрите вариант прозрачных пластиковых оправ.\n'''
+        description += '\tГолубые\n' + \
+            '\t\tПодходят модели голубых, синих, оранжевых, красных оттенков. ' + \
+            'Также рассмотрите вариант прозрачных пластиковых оправ.\n'
         c_vector[[2, 3, 5, 12]] += 1.0
         c_vector[[9]] += 0.3
     elif facevector['eyes_iris'] == 'gray':  # anything
-        description += '''\tСерые\n
-            Любые оттенки вам к лицу.\n'''
+        description += '\tСерые\n' + \
+            '\t\tЛюбые оттенки вам к лицу.\n'
         c_vector += 1.0
     elif facevector['eyes_iris'] == 'green':
-        description += '''\tЗелёные\n
-            Яркие, светлые тона будут отлично смотреться.
-            Также рассмотрите вариант прозрачных пластиковых оправ.\n'''
+        description += '\tЗелёные\n' + \
+            '\t\tЯркие, светлые тона будут отлично смотреться. ' + \
+            'Также рассмотрите вариант прозрачных пластиковых оправ.\n'
         c_vector[[1, 5, 6, 10, 7, 12]] += 1.0
         c_vector[[9]] += 0.3
 
@@ -316,13 +320,13 @@ def translate_facevec2eyeglassesvec(facevector: dict, s_vector: np.ndarray, c_ve
     ##############################
     description += 'Лоб:\n'
     if facevector['forehead'] == 'big' and facevector['bangs'] == 'no':
-        description += '''\tБольшой\n
-            Сместить внимание с большого лба помогут толстые ободковые оправы.\n'''
+        description += '\tБольшой\n' + \
+            '\t\tСместить внимание с большого лба помогут толстые ободковые оправы.\n'
         s_vector[[22]] += 2.0 * emphasize_coef
         s_vector[[10]] += 2.0 * emphasize_coef
     else:
-        description += '''\tНебольшой или закрыт чёлкой\n
-            Попробуйте не слишком толстые оправы.\n'''
+        description += '\tНебольшой или закрыт чёлкой\n' + \
+            '\t\tПопробуйте не слишком толстые оправы.\n'
         s_vector[[22]] -= 0.25 * emphasize_coef
         s_vector[[11, 12]] += 0.25 * emphasize_coef
 
@@ -331,13 +335,13 @@ def translate_facevec2eyeglassesvec(facevector: dict, s_vector: np.ndarray, c_ve
     ##############################
     description += 'Губы:\n'
     if facevector['lips'] == 'big' and facevector['mustache'] == 'no':
-        description += '''\tБольшие\n
-            Сместить акцент с губ помогут толстые ободковые оправы.\n'''
+        description += '\tБольшие\n' + \
+            '\t\tСместить акцент с губ помогут толстые ободковые оправы.\n'
         s_vector[[22]] += 0.5 * emphasize_coef
         s_vector[[10]] += 0.5 * emphasize_coef
     else:
-        description += '''\tОбычные\n
-            Попробуйте не слишком толстые оправы.\n'''
+        description += '\tОбычные\n' + \
+            '\t\tПопробуйте не слишком толстые оправы.\n'
         s_vector[[22]] -= 0.125 * emphasize_coef
         s_vector[[11, 12]] += 0.125 * emphasize_coef
 
@@ -346,8 +350,8 @@ def translate_facevec2eyeglassesvec(facevector: dict, s_vector: np.ndarray, c_ve
     ##############################
     description += 'Волосы:\n'
     if facevector['bald'] == 'yes':
-        description += '''\tЕсть залысины или отсутствуют волосы\n
-            Подойдут толстые черные оправы с плоской верхней частью.\n'''
+        description += '\tЕсть залысины или отсутствуют волосы\n' + \
+            '\t\tПодойдут толстые черные оправы с плоской верхней частью.\n'
         s_vector[[23]] += 2.0 * emphasize_coef
         s_vector[[22]] += 2.0 * emphasize_coef
         s_vector[[10]] += 1.0 * emphasize_coef
@@ -357,33 +361,33 @@ def translate_facevec2eyeglassesvec(facevector: dict, s_vector: np.ndarray, c_ve
     ######### Hair color #########
     ##############################
     if facevector['hair'] == 'black':
-        description += '''\tЧерные\n
-            Металлические оправы с темными или блестящими оттенками.
-            Также рассмотрите вариант прозрачных пластиковых оправ.\n'''
+        description += '\tЧерные\n' + \
+            '\t\tМеталлические оправы с темными или блестящими оттенками. ' + \
+            'Также рассмотрите вариант прозрачных пластиковых оправ.\n'
         s_vector[29] += 1.0
         s_vector[28] += 0.5
         c_vector[[2, 4, 10, 0, 1, 8, 3, 12, 9]] += 1.0
     elif facevector['hair'] == 'blonde':
-        description += '''\tСветлые\n
-            Подойдут яркие цвета, позолоченные оправы, белые оправы.\n'''
+        description += '\tСветлые\n' + \
+            '\t\tПодойдут яркие цвета, позолоченные оправы, белые оправы.\n'
         s_vector[28] += 1.0
         s_vector[29] += 0.5
         c_vector[[2, 13, 5, 10, 6, 0, 12]] += 1.0
     elif facevector['hair'] == 'brown':
-        description += '''\tКоричневые\n
-            Подойдут яркие цвета, позолоченные оправы, белые оправы.\n'''
+        description += '\tКоричневые\n' + \
+            '\t\tПодойдут яркие цвета, позолоченные оправы, белые оправы.\n'
         s_vector[29] += 1.0
         s_vector[28] += 0.5
         c_vector[[4, 13, 8, 5, 6, 7, 1, 0]] += 1.0
     elif facevector['hair'] == 'grey':
-        description += '''\tСедые\n
-            Подойдут цвета метталик, черные, коричневые, фиолетовые.\n'''
+        description += '\tСедые\n' + \
+            '\t\tПодойдут цвета метталик, черные, коричневые, фиолетовые.\n'
         s_vector[29] += 1.0
         s_vector[28] += 0.5
         c_vector[[11, 5, 1, 3, 7, 12, 0, 8]] += 1.0
     elif facevector['hair'] == 'red':
-        description += '''\tРыжие\n
-            Подойдут яркие цвета: золотой, зелёный, красный, белый, синий.\n'''
+        description += '\tРыжие\n' + \
+            '\t\tПодойдут яркие цвета: золотой, зелёный, красный, белый, синий.\n'
         c_vector[[2, 6, 5, 1, 12, 3, 0]] += 1.0
 
     ##############################
@@ -391,28 +395,28 @@ def translate_facevec2eyeglassesvec(facevector: dict, s_vector: np.ndarray, c_ve
     ##############################
     description += 'Тон кожи:\n'
     if facevector['skintone'] == 'warm':
-        description += '''\tТеплый\n
-            Подойдут теплые оттенки, золотые оправы.\n'''
+        description += '\tТеплый\n' + \
+            '\t\tПодойдут теплые оттенки, золотые оправы.\n'
         c_vector[[2, 5, 12, 1, 6]] += 1.0
     elif facevector['skintone'] == 'neutral':  # any color is good
-        description += '''\tНейтральный\n
-            Любые цвета вам к лицу.\n'''
+        description += '\tНейтральный\n' + \
+            '\t\tЛюбые цвета вам к лицу.\n'
         c_vector[[1, 5, 3, 6, 9, 7, 12, 0, 8]] += 1.0
         s_vector[29] += 1.0
     elif facevector['skintone'] == 'cool':
-        description += '''\tХолодный\n
-            Подойдут холодные оттенки, серебряные оправы.\n'''
+        description += '\tХолодный\n' + \
+            '\t\tПодойдут холодные оттенки, серебряные оправы.\n'
         c_vector[[4, 5, 3, 7, 6, 10, 9, 12, 0]] += 1.0
 
     if facevector['race'] == 'black':
-        description += '''\tТемная\n
-            Отличной идеей будет сыграть на контрастах: светлые и прозрачные модели.\n'''
+        description += '\tТемная\n' + \
+            '\t\tОтличной идеей будет сыграть на контрастах: светлые и прозрачные модели.\n'
         c_vector[[9, 12, 0, 4, 2, 11]] += 1.0
     elif facevector['paleskin'] == 'yes':
-        description += '''\tБледная\n
-            Отличной идеей будет сыграть на контрастах: черные, коричневые модели.
-            Также рассмотрите вариант прозрачных пластиковых оправ.
-            Безободковые оправы - не лучший выбор. В них вы будете выглядеть старше.\n'''
+        description += '\tБледная\n' + \
+            '\t\tОтличной идеей будет сыграть на контрастах: черные, коричневые модели. ' + \
+            'Также рассмотрите вариант прозрачных пластиковых оправ. ' + \
+            'Безободковые оправы - не лучший выбор. В них вы будете выглядеть старше.\n'
         c_vector[[9, 1, 0]] += 1.0
         s_vector[[10]] += 1.0 * emphasize_coef
         s_vector[[11]] += 0.5 * emphasize_coef
@@ -424,17 +428,17 @@ def translate_facevec2eyeglassesvec(facevector: dict, s_vector: np.ndarray, c_ve
     ##############################
     description += 'Пол:\n'
     if facevector['gender'] == 'female':
-        description += '''\tЖенский\n
-            Согласно социологическому исследованию, девушки отдают предпочтение
-            ободковым толстым пластиковым оправам.\n'''
+        description += '\tЖенский\n' + \
+            '\t\tСогласно социологическому исследованию, девушки отдают предпочтение ' + \
+            'ободковым толстым пластиковым оправам.\n'
         s_vector[[28]] += 2.0 * emphasize_coef
         s_vector[[10]] += 2.0 * emphasize_coef
         s_vector[[22]] += 2.0 * emphasize_coef
         s_vector[[30]] -= 1.0
     else:
-        description += '''\tМужской\n
-            Согласно социологическому исследованию, мужчины отдают предпочтение
-            полуободковым металлическим оправам.\n'''
+        description += '\tМужской\n' + \
+            '\t\tСогласно социологическому исследованию, мужчины отдают предпочтение ' + \
+            'полуободковым металлическим оправам.\n'
         s_vector[[29]] += 1.0 * emphasize_coef
         s_vector[[10]] += 0.5 * emphasize_coef
         s_vector[[11]] += 1.0 * emphasize_coef
