@@ -173,6 +173,13 @@ To work with new image use:
 ins.update_image('test2.jpg')
 ins.expert_module()
 ```
+
+You can alse use url as an argument:
+```Python
+ins.update_image('https://github.com/Defasium/expertglasses/blob/master/assets/gui.png?raw=true')
+ins.expert_module()
+```
+
 ____
 
 To generate unique image with GANs (implying that you have downloaded pretrained models, look [__Download pretrained GAN models__](#download-pretrained-gan-models) section) use:
