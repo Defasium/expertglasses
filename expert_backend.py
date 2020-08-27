@@ -34,6 +34,7 @@ At the current state expert recommendation system has already implemented:
     random best-selling
     * Generating of unique eyeframes with Generative Adversarial Networks (GAN)
     * Caching previous results, so old photos will be processed immediately
+    * English and russian localization for the interface
 
 Examples:
     To use this system, you simply import class in your python code:
@@ -41,6 +42,9 @@ Examples:
 
     After that you create an instance of this class with specified path to the image:
         # ins = ExpertEyeglassesRecommender('test.jpg')
+
+    By passing a `lang` parameter you can specify language, which will be used at explanation step:
+        # ins = ExpertEyeglassesRecommender('test.jpg', lang='en')
 
     Initialization of class may take quite a long time (from 20 second up to 2 minutes)
     After initialization your recomendations will be completed and you can get top 6
@@ -55,11 +59,11 @@ Examples:
         # ins.expert_module()
 
     You can also pass an url:
-        # ins.update_image('https://github.com/Defasium/expertglasses/blob/master/assets/gui.png?raw=true')
+        # ins.update_image(
+                'https://github.com/Defasium/expertglasses/blob/master/assets/gui.png?raw=true')
         # ins.expert_module()
 
 Todo:
-    * Add english version of the UI
     * Implementation of searching similar glasses
     * Implementation of initial preferences in style of eyeglasses
     * Implementation of simple eyeglasses try-on
@@ -93,7 +97,7 @@ from model_architecture import build_network
 from shufflenet_and_gans.common import resolve_single
 from shufflenet_and_gans.srgan import generator
 
-VERSION = __version__ = '0.2.1 Released 22-August-2020'
+VERSION = __version__ = '0.2.5 Released 27-August-2020'
 
 def change_hue(img, value):
     '''Changes saturation of an image multiple time of given value.
@@ -137,10 +141,10 @@ class ExpertEyeglassesRecommender:
     __slots__ = ['database', 'description', 'eyeglasses_shape_vector', 'eyeglasses_color_vector',
                  'error_occured', 'error_message', '_request_num', '_vectors', '_logger',
                  '_verbose', '_session', '_graph', '_prefix', '_face_vector', '_cache',
-                 '_hash', '_tags', '_models', '_shapevec', '_colorvec', '_precompcv1',
+                 '_hash', '_tags', '_models', '_shapevec', '_colorvec', '_precompcv1', '_lang',
                  '_precompcv2', '_precomp', '_features', '_eyes', '_saturated_eyes', '_image',]
-  
-    def __init__(self, image, window=None, logger=None, verbose=False):
+
+    def __init__(self, image, window=None, logger=None, verbose=False, lang='ru'):
         '''Constructor of recomendation class. In constructor you should always define path
         to the photo with face
 
@@ -149,7 +153,9 @@ class ExpertEyeglassesRecommender:
             window (PySimpleGUI.Window class, optional): Copy of window instance,
             which is necessary for progress bar updates in GUI realization.
             logger (logging.Logger class, optional): Logger instance for logging events.
-            verbose (bool, optional): If True, prints info messages
+            verbose (bool, optional): If True, prints info messages.
+            lang (str, default='ru'): Language of recommendation's explanations. Supported
+            values are ['en', 'ru'].
         '''
         self._request_num = 0
         self._vectors = dict()
@@ -159,13 +165,20 @@ class ExpertEyeglassesRecommender:
         self._graph = tf.get_default_graph()
         self._prefix = os.path.dirname(os.path.abspath(__file__))
         self._face_vector = None
+        self._lang = lang.strip().lower()
         self.eyeglasses_shape_vector = None
         self.eyeglasses_color_vector = None
         self.description = ''
 
+        # if localization not supported, raise exception
+        supported_localizations = [lang[:2] for lang in os.listdir(os.path.join(self._prefix,
+                                                                                'lang'))]
+        if self._lang not in supported_localizations:
+            raise NotImplementedError('Language %s is not currently supported!' % self._lang)
+
         # if there are cached results from last execution, load them in memory
-        if os.path.exists('utils/cached.gz'):
-            self._cache = joblib.load('utils/cached.gz')
+        if os.path.exists(os.path.join(self._prefix, 'utils/cached.gz')):
+            self._cache = joblib.load(os.path.join(self._prefix, 'utils/cached.gz'))
             self._tags = {k: v[-1] for k, v in self._cache.items()}
             # for each hash there are corresponding facial attributes,
             # but no eyeglasses features, that's why we repeatedly call expert module
@@ -486,9 +499,9 @@ class ExpertEyeglassesRecommender:
         '''Update current image in the system by given image path.
 
                 Args:
-                    image (str of file obj): A filename or URL (string), pathlib. Path object or a file object. 
-                    The file object must implement read(), seek(), and tell()
-                    methods, and be opened in binary mode.
+                    image (str of file obj): A filename or URL (string), pathlib.
+                    Path object or a file object. The file object must implement
+                    read(), seek(), and tell()methods, and be opened in binary mode.
 
                 Returns:
                     None.
@@ -747,7 +760,8 @@ class ExpertEyeglassesRecommender:
         facevector = self.get_facevector()
 
         # translating facevector to eyeglasses vectors
-        s_vector, c_vector, self.description = map_face2glass(facevector, s_vector, c_vector)
+        s_vector, c_vector, self.description = map_face2glass(facevector, s_vector,
+                                                              c_vector, self._lang)
         self.eyeglasses_shape_vector, self.eyeglasses_color_vector = s_vector, c_vector
         self._vectors[self._hash] = s_vector, c_vector, self.description
         return s_vector, c_vector

@@ -14,7 +14,7 @@ At the current state in translation function was already implemented:
     * Processing the scenario, when there is no dominant face shape
     * Paying more attention to other face shapes when dominant face shape is oval/oblong
     * Static-based rules, written in code
-    * Description of applied rules in russian for great interpretability
+    * Description of applied rules in english/russian for great interpretability
 
 Example:
     To use this module, you simply import class in your python code:
@@ -23,7 +23,6 @@ Example:
     After that you can call it with given protocol
 
 Todo:
-    * Add english version of description
     * Place description's texts in separate file
     * Place rules in separate file, so it will be possible to manually change them
     * Implementation of summarizing results of explanation module
@@ -33,12 +32,14 @@ Todo:
    https://github.com/Defasium/expertglasses
 
 '''
+import json
 
 import numpy as np
 
-VERSION = __version__ = '0.2.0 Released 26-May-2020'
+VERSION = __version__ = '0.2.5 Released 27-August-2020'
 
-def translate_facevec2eyeglassesvec(facevector: dict, s_vector: np.ndarray, c_vector: np.ndarray):
+def translate_facevec2eyeglassesvec(facevector: dict, s_vector: np.ndarray, c_vector: np.ndarray,
+                                    lang='ru'):
     '''Maps facial features to eyeglasses features
     by consequentially applying static expert rules. Also
     constructs description for each rule, which can be used to
@@ -46,20 +47,27 @@ def translate_facevec2eyeglassesvec(facevector: dict, s_vector: np.ndarray, c_ve
 
             Args:
                 facevector (dict with strings as key): Dictionary with facial attributes.
-                s_vector (numpy.ndarray): Initial shape attributes of eyeglasses
-                c_vector (numpy.ndarray): Initial color attributes of eyeglasses
+                s_vector (numpy.ndarray): Initial shape attributes of eyeglasses.
+                c_vector (numpy.ndarray): Initial color attributes of eyeglasses.
+                lang (str, default='ru'): What language to use for description.
+                Supported values are ['ru', 'en'].
             Returns:
                 s_vector (numpy.ndarray): Final shape attributes of eyeglasses.
                 c_vector (numpy.ndarray): Final color attributes of eyeglasses.
                 description (str): Explanation of translation and applied rules.
 
     '''
-    description = ''
+
+    # load specified localization from json
+    with open('lang/%s_lang.json' % lang, 'r') as lang_file:
+        lang_i = json.load(lang_file)['explanation'].copy()
+
+    description = []
 
     ##############################
     ######### Faceshape ##########
     ##############################
-    description += 'Форма лица:\n'
+    description.append(lang_i['faceshape']['header'])
     if facevector['faceshape'][0][0] < 0.35:
         emphasize_coef = 3
     else:
@@ -74,12 +82,6 @@ def translate_facevec2eyeglassesvec(facevector: dict, s_vector: np.ndarray, c_ve
         else:
             attention_on_other_shapes = 1
         if faceshape == 'oval':
-            description += f'\tОвальная на {fraction*100:.1f}%\n'
-            description += '\t\tТонкие оправы не лучший выбор (делают визуально шире), ' + \
-            'в основном хороши все. Стоит обратить внимание на оправы квадратной формы, ' + \
-            'прямоугольной, авиаторы. Лучше избегать слишком больших и слишком мелких оправ. ' + \
-            'Ободковые и полуободковые оправы - хороший выбор для вытянутого лица. ' + \
-            'Любой цвет вам к лицу.\n'
             s_vector[[0, 1, 4, 8]] += fraction * 2
             s_vector[[2, 3, 5, 6, 7, 9]] += fraction / 2
             s_vector[14] += fraction  # small and oversized are bad choice
@@ -90,11 +92,6 @@ def translate_facevec2eyeglassesvec(facevector: dict, s_vector: np.ndarray, c_ve
                 s_vector[[10, 11]] += fraction
             c_vector += fraction
         elif faceshape == 'triangle':
-            description += f'\tТреугольная на {fraction*100:.1f}%\n'
-            description += '\t\tСтоит обратить внимание на оправы формы кошачий глаз, ' + \
-            'клабмастеры, круглой. Тонкие металлические или пластиковые оправы - вам к лицу. ' + \
-            'Лучше избегать оправ темных оттенков. Подходят легкие, светлые цвета. Также ' + \
-            'рассмотрите вариант прозрачных пластиковых оправ.\n'
             s_vector[[3, 5, 7]] += fraction * 2 * attention_on_other_shapes
             s_vector[[0, 1, 2, 4]] += fraction / 2 * attention_on_other_shapes
             s_vector[[28]] += fraction * attention_on_other_shapes
@@ -103,11 +100,6 @@ def translate_facevec2eyeglassesvec(facevector: dict, s_vector: np.ndarray, c_ve
             c_vector[[3, 8, 12]] += fraction * attention_on_other_shapes
             c_vector[[9]] += fraction * attention_on_other_shapes / 3
         elif faceshape == 'oblong':
-            description += f'\tВытянутая на {fraction*100:.1f}%\n'
-            description += '\t\tСтоит обратить внимание на оправы круглой формы и ' + \
-            'авиаторы. Для большей гармоничности рекомендуется рассмотреть оправы, вытянутые ' + \
-            'в высоту, нежели в ширину. Попробуйте оправы, у которых цвет дужек отличается ' + \
-            'от основного цвета.\n'
             s_vector[[3, 4]] += fraction * 2
             s_vector[[2]] += fraction / 2
             s_vector[14] += fraction
@@ -116,12 +108,6 @@ def translate_facevec2eyeglassesvec(facevector: dict, s_vector: np.ndarray, c_ve
             c_vector[13] += fraction
             c_vector[14] += fraction
         elif faceshape == 'heart':
-            description += f'\tСердцевидная на {fraction*100:.1f}%\n'
-            description += '\t\tУ вас заострённый подбородок. Для гармонии лучше выбирать ' + \
-            'оправы, расширающиеся книзу. Поэкспериментируйте со стилем ретро. Стоит обратить ' + \
-            'внимание на оправы овальной формы, клабмастеры, авиаторы. Лучше избегать ' + \
-            'сужающихся и очень тонких моделей. Подходят легкие, светлые цвета, ' + \
-            'оттенки коричневого.\n'
             s_vector[[2, 4, 7, 9]] += fraction * 2 * attention_on_other_shapes
             s_vector[[0, 1, 3]] += fraction / 2 * attention_on_other_shapes
             s_vector[[11, 12]] += fraction * attention_on_other_shapes
@@ -131,12 +117,6 @@ def translate_facevec2eyeglassesvec(facevector: dict, s_vector: np.ndarray, c_ve
             c_vector[[1, 8]] += fraction * attention_on_other_shapes
             c_vector[[9]] += fraction / 3 * attention_on_other_shapes
         elif faceshape == 'diamond':
-            description += f'\tРомбовидная на {fraction*100:.1f}%\n'
-            description += '\t\tФорма лица редкая и сбалансированная. Чтобы подчеркнуть те ' + \
-            'или иные черты, рассмотрите оправы формы кошачий гла, клабмастеры, овальные. ' + \
-            'Лучше избегать слишком больших и слишком мелких оправ. Лучше избегать ' + \
-            'расширяющихся книзу моделей. Рассмотрите вариант металлических полуободковых ' + \
-            'оправ. Подходят оттенки коричневого, черного. Оправы с темным верхом.\n'
             s_vector[[2, 4, 7]] += fraction * attention_on_other_shapes
             s_vector[[29]] += fraction * attention_on_other_shapes
             s_vector[[11]] += fraction * attention_on_other_shapes
@@ -146,11 +126,6 @@ def translate_facevec2eyeglassesvec(facevector: dict, s_vector: np.ndarray, c_ve
             s_vector[[13, 15, 16, 18]] -= fraction * attention_on_other_shapes
             c_vector[[1, 2, 13]] += fraction * attention_on_other_shapes
         elif faceshape == 'round':
-            description += f'\tКруглая на {fraction*100:.1f}%\n'
-            description += '\t\tСтоит обратить внимание на оправы формы кошачий глаз, ' + \
-            'прямоугольные, квадратные и в целом угловатые. Лучше избегать круглых и овальных ' + \
-            'оправ, невытянутых, а также толстых. Рассмотрите вариант ободковых и ' + \
-            'полуободковых моделей. Подходят оттенки коричневого, черного. Оправы с принтом.\n'
             s_vector[[0, 1, 5, 9]] += fraction * 2 * attention_on_other_shapes
             s_vector[[2, 3]] -= fraction * 2 * attention_on_other_shapes
             s_vector[14] += fraction * attention_on_other_shapes
@@ -161,11 +136,6 @@ def translate_facevec2eyeglassesvec(facevector: dict, s_vector: np.ndarray, c_ve
             s_vector[[22]] -= fraction * 2 * attention_on_other_shapes
             c_vector[[1, 2, 13]] += fraction * attention_on_other_shapes
         elif faceshape == 'square':
-            description += f'\tКвадратная на {fraction*100:.1f}%\n'
-            description += '\t\tСтоит обратить внимание на оправы круглой, овальной формы, ' + \
-            'и со сглаженными краями. Лучше избегать квардратных, прямоугольных, ' + \
-            'акцентирующих внимание на челюсти, моделей. Рассмотрите вариант широких ' + \
-            'пластиковых оправ. Поэкспериментируйте с цветами, попробуйте яркие раскраски.\n'
             s_vector[[3]] += fraction * 2 * attention_on_other_shapes
             s_vector[[2, 5]] += fraction * attention_on_other_shapes
             s_vector[[0, 1]] -= fraction * 2 * attention_on_other_shapes
@@ -176,11 +146,6 @@ def translate_facevec2eyeglassesvec(facevector: dict, s_vector: np.ndarray, c_ve
             c_vector[[10, 3, 5, 7, 12]] += fraction * attention_on_other_shapes
             c_vector[[9]] += fraction / 3 * attention_on_other_shapes
         elif faceshape == 'rectangle':
-            description += f'\tПрямоугольная на {fraction*100:.1f}%\n'
-            description += '\t\tСтоит обратить внимание на оправы круглой формы, ' + \
-            'авиаторы, оправы со сглаженными краями. Для большей гармоничности рекомендуется ' + \
-            'рассмотреть оправы, вытянутые в высоту, нежели в ширину. Попробуйте оправы, ' + \
-            'у котрых цвет дужек отличается от основного цвета.\n'
             s_vector[[3, 4]] += fraction * attention_on_other_shapes
             s_vector[[2]] += fraction / 2 * attention_on_other_shapes
             s_vector[14] += fraction / 2 * attention_on_other_shapes
@@ -189,102 +154,96 @@ def translate_facevec2eyeglassesvec(facevector: dict, s_vector: np.ndarray, c_ve
             c_vector[14] += fraction * attention_on_other_shapes
             s_vector[[11, 12]] += fraction / 2 * attention_on_other_shapes
 
+        # add description
+        description.append(lang_i['faceshape'][faceshape]['prefix'])
+        description.append(f'{fraction*100:.1f}%\n')
+        description.append(lang_i['faceshape'][faceshape]['description'])
+
     ##############################
     ######### Faceratio ##########
     ##############################
-    description += 'Пропорции лица:\n'
+    description.append(lang_i['faceratio']['header'])
     if facevector['ratio'] == 'wider':
-        description += '\tШире\n' + \
-        '\t\tПодойдут оправы, вытянутые в ширину.\n'
         s_vector[[10, 20]] += 2.0 * emphasize_coef
         s_vector[[15, 16]] -= 2.0 * emphasize_coef
     elif facevector['ratio'] == 'longer':
-        description += '\tВыше\n' + \
-        '\t\tПодойдут оправы, вытянутые в высоту.\n'
         s_vector[[20]] -= 2.0 * emphasize_coef
         s_vector[[14, 15]] += 2.0 * emphasize_coef
-    else:
-        description += '\tСбалансированные\n' + \
-        '\t\t\n'
+
+    description.append(lang_i['faceratio'][facevector['ratio']]['prefix'])
+    description.append(lang_i['faceratio'][facevector['ratio']]['description'])
 
     ##############################
     ########## Jawtype ###########
     ##############################
-    description += 'Форма челюсти:\n'
+    description.append(lang_i['jawtype']['header'])
     if facevector['beard'] == 'no':  # huge beard biases focus from faceshape
         if facevector['jawtype'] == 'soft' or \
                         facevector['doublechin'] == 'yes' or \
                         facevector['chubby'] == 'yes':
-            description += '\tМягкая\n' + \
-            '\t\tПодойдут оправы угловатой формы.\n'
+            description.append(lang_i['jawtype']['soft']['prefix'])
+            description.append(lang_i['jawtype']['soft']['description'])
             s_vector[[21]] += 2.0 * emphasize_coef
             s_vector[[2, 3, 5]] += 2.0 * emphasize_coef
         else:
-            description += '\tВыраженная\n' + \
-            '\t\tПодойдут оправы со сглаженными краями.\n'
+            description.append(lang_i['jawtype']['defined']['prefix'])
+            description.append(lang_i['jawtype']['defined']['description'])
             s_vector[[21]] -= 2.0 * emphasize_coef
             s_vector[[0, 1]] += 2.0 * emphasize_coef
     else:
-        description += '\tПрисутствует борода\n' + \
-        '\t\tБорода смещает акцент вниз, рекомендуется рассмотреть ' + \
-        'сужающиеся книзу модели.\n'
+        description.append(lang_i['jawtype']['beard']['prefix'])
+        description.append(lang_i['jawtype']['beard']['description'])
         s_vector[[20]] += 1.0 * emphasize_coef
 
     ##############################
     ######### Eyebrows ###########
     ##############################
-    description += 'Брови:\n'
+    description.append(lang_i['eyebrows']['header'])
     if facevector['eyebrows_thickness'] == 'thick':
-        description += '\tТолстые\n' + \
-        '\t\tОбодковые толстые оправы будут выглядеть с толстыми бровями комично.\n'
+        description.append(lang_i['eyebrows'][facevector['eyebrows_thickness']]['prefix'])
+        description.append(lang_i['eyebrows'][facevector['eyebrows_thickness']]['description'])
         s_vector[[11, 12]] += 1.0 * emphasize_coef
         s_vector[[22]] -= 1.0 * emphasize_coef
     elif facevector['eyebrows_thickness'] == 'thin':
-        description += '\tТонкие\n' + \
-        '\t\tОбодковые толстые оправы подчеркнут область глаз.\n'
+        description.append(lang_i['eyebrows'][facevector['eyebrows_thickness']]['prefix'])
+        description.append(lang_i['eyebrows'][facevector['eyebrows_thickness']]['description'])
         s_vector[[10]] += 1.0 * emphasize_coef
         s_vector[[22]] += 1.0 * emphasize_coef
 
-
     if facevector['eyebrows_shape'] == 'flat':
-        description += '\tПлоская линия бровей\n'
         s_vector[[23]] += 2.0 * emphasize_coef
     elif facevector['eyebrows_shape'] == 'curly':
-        description += '\tЗакруглённая линия бровей\n'
         s_vector[[24, 25]] += 2.0 * emphasize_coef
     elif facevector['eyebrows_shape'] == 'roof':
-        description += '\tЛиния бровей <<домиком>>\n'
         s_vector[[26]] += 2.0 * emphasize_coef
     elif facevector['eyebrows_shape'] == 'angry':
-        description += '\tХмурая линия бровей\n'
         s_vector[[27]] += 2.0 * emphasize_coef
-    description += '\t\tФорма верхней части оправ должна повторять линию бровей\n'
+
+    description.append(lang_i['eyebrows'][facevector['eyebrows_shape']]['prefix'])
+    description.append(lang_i['eyebrows'][facevector['eyebrows_shape']]['description'])
+
     ##############################
     ############ Nose ############
     ##############################
-    description += 'Размер Носа:\n'
-    if facevector['nose_size'] == 'big':
-        description += '\tКрупный\n' + \
-            '\t\tСместить внимание с крупного носа помогут оправы толстой формы. ' + \
-            'Отсутствие носоупоров сыграет на пользу.\n'
+    description.append(lang_i['nose']['header'])
+    if facevector['nose_size'] in ('big', 'long'):
         s_vector[[10]] += 1.0 * emphasize_coef
         s_vector[[22]] += 1.0 * emphasize_coef
         s_vector[[19]] -= 1.0 * emphasize_coef
     else:
-        description += '\tНебольшой\n' + \
-            '\t\tМожно смело рассматривать модели с носоупорами. ' + \
-            'Полуобоковые и безободковые оправы стоят рассмотрения.\n'
         s_vector[[11, 12]] += 0.25
         s_vector[[19]] += 1.0
+
+    description.append(lang_i['nose'][facevector['nose_size']]['prefix'])
+    description.append(lang_i['nose'][facevector['nose_size']]['description'])
 
     ##############################
     ############ Eyes ############
     ##############################
-    description += 'Глаза:\n'
+    description.append(lang_i['eyes']['header'])
     if facevector['eyes_narrow'] == 'yes':
-        description += '\tУзкий разрез глаз:\n' + \
-            '\t\tДля узкого разреза глаз лучше выбирать большие, не слишком толстые оправы. ' + \
-            'Темные оттенки - не лучший выбор.\n'
+        description.append(lang_i['eyes']['narrow']['prefix'])
+        description.append(lang_i['eyes']['narrow']['description'])
         s_vector[[14, 15]] += 1.0 * emphasize_coef
         s_vector[[17, 18]] += 1.0 * emphasize_coef  # narrow eyes -> larger frames
         c_vector[[0, 1]] -= 1.0 * emphasize_coef
@@ -293,65 +252,57 @@ def translate_facevec2eyeglassesvec(facevector: dict, s_vector: np.ndarray, c_ve
         c_vector[[9]] += 0.3
 
     if facevector['eyes_iris'] == 'brown':
-        description += '\tКарие\n' + \
-            '\t\tПодходят модели коричневых, синих, темнозеленых, светлых оттенков. ' + \
-            'Также рассмотрите вариант прозрачных пластиковых оправ.\n'
         c_vector[[1, 3, 12, 13]] += 1.0
         c_vector[[9]] += 0.3
     elif facevector['eyes_iris'] == 'blue':
-        description += '\tГолубые\n' + \
-            '\t\tПодходят модели голубых, синих, оранжевых, красных оттенков. ' + \
-            'Также рассмотрите вариант прозрачных пластиковых оправ.\n'
         c_vector[[2, 3, 5, 12]] += 1.0
         c_vector[[9]] += 0.3
     elif facevector['eyes_iris'] == 'gray':  # anything
-        description += '\tСерые\n' + \
-            '\t\tЛюбые оттенки вам к лицу.\n'
         c_vector += 1.0
     elif facevector['eyes_iris'] == 'green':
-        description += '\tЗелёные\n' + \
-            '\t\tЯркие, светлые тона будут отлично смотреться. ' + \
-            'Также рассмотрите вариант прозрачных пластиковых оправ.\n'
         c_vector[[1, 5, 6, 10, 7, 12]] += 1.0
         c_vector[[9]] += 0.3
+
+    description.append(lang_i['eyes'][facevector['eyes_iris']]['prefix'])
+    description.append(lang_i['eyes'][facevector['eyes_iris']]['description'])
 
     ##############################
     ######### Forehead ###########
     ##############################
-    description += 'Лоб:\n'
+    description.append(lang_i['forehead']['header'])
     if facevector['forehead'] == 'big' and facevector['bangs'] == 'no':
-        description += '\tБольшой\n' + \
-            '\t\tСместить внимание с большого лба помогут толстые ободковые оправы.\n'
+        description.append(lang_i['forehead']['big']['prefix'])
+        description.append(lang_i['forehead']['big']['description'])
         s_vector[[22]] += 2.0 * emphasize_coef
         s_vector[[10]] += 2.0 * emphasize_coef
     else:
-        description += '\tНебольшой или закрыт чёлкой\n' + \
-            '\t\tПопробуйте не слишком толстые оправы.\n'
+        description.append(lang_i['forehead']['small']['prefix'])
+        description.append(lang_i['forehead']['small']['description'])
         s_vector[[22]] -= 0.25 * emphasize_coef
         s_vector[[11, 12]] += 0.25 * emphasize_coef
 
     ##############################
     ########### Lips #############
     ##############################
-    description += 'Губы:\n'
+    description.append(lang_i['lips']['header'])
     if facevector['lips'] == 'big' and facevector['mustache'] == 'no':
-        description += '\tБольшие\n' + \
-            '\t\tСместить акцент с губ помогут толстые ободковые оправы.\n'
+        description.append(lang_i['lips'][facevector['lips']]['prefix'])
+        description.append(lang_i['lips'][facevector['lips']]['description'])
         s_vector[[22]] += 0.5 * emphasize_coef
         s_vector[[10]] += 0.5 * emphasize_coef
     else:
-        description += '\tОбычные\n' + \
-            '\t\tПопробуйте не слишком толстые оправы.\n'
+        description.append(lang_i['lips'][facevector['lips']]['prefix'])
+        description.append(lang_i['lips'][facevector['lips']]['description'])
         s_vector[[22]] -= 0.125 * emphasize_coef
         s_vector[[11, 12]] += 0.125 * emphasize_coef
 
     ##############################
     ########## Baldness ##########
     ##############################
-    description += 'Волосы:\n'
+    description.append(lang_i['hair']['header'])
     if facevector['bald'] == 'yes':
-        description += '\tЕсть залысины или отсутствуют волосы\n' + \
-            '\t\tПодойдут толстые черные оправы с плоской верхней частью.\n'
+        description.append(lang_i['hair']['bald']['prefix'])
+        description.append(lang_i['hair']['bald']['description'])
         s_vector[[23]] += 2.0 * emphasize_coef
         s_vector[[22]] += 2.0 * emphasize_coef
         s_vector[[10]] += 1.0 * emphasize_coef
@@ -361,62 +312,49 @@ def translate_facevec2eyeglassesvec(facevector: dict, s_vector: np.ndarray, c_ve
     ######### Hair color #########
     ##############################
     if facevector['hair'] == 'black':
-        description += '\tЧерные\n' + \
-            '\t\tМеталлические оправы с темными или блестящими оттенками. ' + \
-            'Также рассмотрите вариант прозрачных пластиковых оправ.\n'
         s_vector[29] += 1.0
         s_vector[28] += 0.5
         c_vector[[2, 4, 10, 0, 1, 8, 3, 12, 9]] += 1.0
     elif facevector['hair'] == 'blonde':
-        description += '\tСветлые\n' + \
-            '\t\tПодойдут яркие цвета, позолоченные оправы, белые оправы.\n'
         s_vector[28] += 1.0
         s_vector[29] += 0.5
         c_vector[[2, 13, 5, 10, 6, 0, 12]] += 1.0
     elif facevector['hair'] == 'brown':
-        description += '\tКоричневые\n' + \
-            '\t\tПодойдут яркие цвета, позолоченные оправы, белые оправы.\n'
         s_vector[29] += 1.0
         s_vector[28] += 0.5
         c_vector[[4, 13, 8, 5, 6, 7, 1, 0]] += 1.0
     elif facevector['hair'] == 'grey':
-        description += '\tСедые\n' + \
-            '\t\tПодойдут цвета метталик, черные, коричневые, фиолетовые.\n'
         s_vector[29] += 1.0
         s_vector[28] += 0.5
         c_vector[[11, 5, 1, 3, 7, 12, 0, 8]] += 1.0
     elif facevector['hair'] == 'red':
-        description += '\tРыжие\n' + \
-            '\t\tПодойдут яркие цвета: золотой, зелёный, красный, белый, синий.\n'
         c_vector[[2, 6, 5, 1, 12, 3, 0]] += 1.0
+
+    description.append(lang_i['hair']['haircolor'][facevector['hair']]['prefix'])
+    description.append(lang_i['hair']['haircolor'][facevector['hair']]['description'])
 
     ##############################
     ######### Skintone ###########
     ##############################
-    description += 'Тон кожи:\n'
+    description.append(lang_i['skintone']['header'])
     if facevector['skintone'] == 'warm':
-        description += '\tТеплый\n' + \
-            '\t\tПодойдут теплые оттенки, золотые оправы.\n'
         c_vector[[2, 5, 12, 1, 6]] += 1.0
     elif facevector['skintone'] == 'neutral':  # any color is good
-        description += '\tНейтральный\n' + \
-            '\t\tЛюбые цвета вам к лицу.\n'
         c_vector[[1, 5, 3, 6, 9, 7, 12, 0, 8]] += 1.0
         s_vector[29] += 1.0
     elif facevector['skintone'] == 'cool':
-        description += '\tХолодный\n' + \
-            '\t\tПодойдут холодные оттенки, серебряные оправы.\n'
         c_vector[[4, 5, 3, 7, 6, 10, 9, 12, 0]] += 1.0
 
+    description.append(lang_i['skintone'][facevector['skintone']]['prefix'])
+    description.append(lang_i['skintone'][facevector['skintone']]['description'])
+
     if facevector['race'] == 'black':
-        description += '\tТемная\n' + \
-            '\t\tОтличной идеей будет сыграть на контрастах: светлые и прозрачные модели.\n'
+        description.append(lang_i['skintone']['black']['prefix'])
+        description.append(lang_i['skintone']['black']['description'])
         c_vector[[9, 12, 0, 4, 2, 11]] += 1.0
     elif facevector['paleskin'] == 'yes':
-        description += '\tБледная\n' + \
-            '\t\tОтличной идеей будет сыграть на контрастах: черные, коричневые модели. ' + \
-            'Также рассмотрите вариант прозрачных пластиковых оправ. ' + \
-            'Безободковые оправы - не лучший выбор. В них вы будете выглядеть старше.\n'
+        description.append(lang_i['skintone']['pale']['prefix'])
+        description.append(lang_i['skintone']['pale']['description'])
         c_vector[[9, 1, 0]] += 1.0
         s_vector[[10]] += 1.0 * emphasize_coef
         s_vector[[11]] += 0.5 * emphasize_coef
@@ -424,24 +362,21 @@ def translate_facevec2eyeglassesvec(facevector: dict, s_vector: np.ndarray, c_ve
         c_vector[[0, 3, 6, 13]] += 0.5
 
     ##############################
-    ########## Gender ############
+    ############ Sex #############
     ##############################
-    description += 'Пол:\n'
+    description.append(lang_i['sex']['header'])
     if facevector['gender'] == 'female':
-        description += '\tЖенский\n' + \
-            '\t\tСогласно социологическому исследованию, девушки отдают предпочтение ' + \
-            'ободковым толстым пластиковым оправам.\n'
         s_vector[[28]] += 2.0 * emphasize_coef
         s_vector[[10]] += 2.0 * emphasize_coef
         s_vector[[22]] += 2.0 * emphasize_coef
         s_vector[[30]] -= 1.0
     else:
-        description += '\tМужской\n' + \
-            '\t\tСогласно социологическому исследованию, мужчины отдают предпочтение ' + \
-            'полуободковым металлическим оправам.\n'
         s_vector[[29]] += 1.0 * emphasize_coef
         s_vector[[10]] += 0.5 * emphasize_coef
         s_vector[[11]] += 1.0 * emphasize_coef
         s_vector[[30]] += 1.0
 
-    return s_vector, c_vector, description
+    description.append(lang_i['sex'][facevector['gender']]['prefix'])
+    description.append(lang_i['sex'][facevector['gender']]['description'])
+
+    return s_vector, c_vector, ''.join(description)
