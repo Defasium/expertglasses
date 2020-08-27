@@ -13,6 +13,7 @@ demonstrate features, such as:
     * Visualization of top-6 most corresponding eyeframes
     * Generating of unique eyeframes with Generative Adversarial Networks (GAN)
     * Caching previous results, so old photos will be processed immediately
+    * English and russian localization for the interface
 
 Example:
     To launch script, you should use the following command from the terminal:
@@ -23,7 +24,6 @@ Example:
     seconds up to 2 minutes). When progressbar will be filled, the main interface will appear.
 
 Todo:
-    * Add english version of the GUI, which will be available as option at the starting screen
     * Implementation of search of similar glasses, by clicking on eyeframes' image
     * Implementation of toggle bars controls for the extracted face shape
     * Implementation of summarizing results of explanation module
@@ -41,13 +41,14 @@ import logging
 import sys
 from functools import partial
 from io import BytesIO
+import json
 
 import PySimpleGUI as sg
 import cv2
 
 from expert_backend import ExpertEyeglassesRecommender
 
-VERSION = __version__ = '0.2.0 Released 26-May-2020'
+VERSION = __version__ = '0.2.5 Released 27-August-2020'
 
 # font-styles
 FONT_STYLE = 'Helvetica'
@@ -65,83 +66,116 @@ if __name__ == '__main__':
 
     # gets or creates a logger
     logger = logging.getLogger(__name__)
+    logger.setLevel(logging.DEBUG)
 
     # define file handler and set formatter
     file_handler = logging.FileHandler('logfile.log')
+    file_handler.setLevel(logging.DEBUG)
+
+    # create formatter and add it to the handler
+    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    file_handler.setFormatter(formatter)
 
     # add file handler to logger
     logger.addHandler(file_handler)
 
-    # layout for loading components Window
-    layout0 = [[sg.Text('Загрузка модулей')],
-               [sg.ProgressBar(100, orientation='h', size=(20, 20), key='progbar')]]
-
     # layout for start screen
-    layout = [[sg.Text('Выберите фотографию с лицом')],
-              [sg.Input(key='file', visible=False, enable_events=True), sg.FileBrowse('Открыть')]]
+    layout0 = [[sg.Column([[sg.Text('Choose an image with face', key='chose_text')],
+                           [sg.Input(key='file', visible=False, enable_events=True),
+                            sg.FileBrowse('Open', key='open')],
+                           [sg.Text('Language', key='lang_text')],
+                           [combo_element(key='lang', values=('English', 'Русский'),
+                                          default_value='English', enable_events=True)]],
+                          element_justification='center')]]
 
     # create the Window
-    win1 = sg.Window('Открытие файла', layout)
-    _, values = win1.read()
+    start_win = sg.Window('Start window', layout0)
+    while True:
+        _, values = start_win.read()
+
+        if values['lang'] == 'English':
+            LANGUAGE = 'en'
+        elif values['lang'] == 'Русский':
+            LANGUAGE = 'ru'
+
+        # load localization of GUI
+        with open("lang/%s_lang.json" % LANGUAGE, "r") as f:
+            lang_gui = json.load(f)['gui'].copy()
+
+        # update text in the current window
+        start_win['lang_text'].update(lang_gui['layout0']['lang_text'])
+        start_win['chose_text'].update(lang_gui['layout0']['chose'])
+        start_win['open'].update(lang_gui['layout0']['open'])
+        start_win.TKroot.title(lang_gui['start_win']['title'])
+
+        # if file was chosen, stop the loop
+        if values['file']:
+            break
+
     # need to destroy the window as it's still open
-    win1.close()
+    start_win.close()
+
+    # layout for loading components Window
+    layout1 = [[sg.Text(lang_gui['layout1']['header'])],
+               [sg.ProgressBar(100, orientation='h', size=(20, 20), key='progbar')]]
 
     image_path = values['file']
     # check when no image was chosen
     if not image_path:
-        logger.error('Вы не выбрали изображение! Завершение работы...')
+        logger.error(lang_gui['logger']['error']['no_image'])
         sys.exit()
 
     # window for loading of all necessary components
-    window = sg.Window('Загрузка модулей', layout0)
-    logger.info('You chose: %s', image_path)
+    prog_win = sg.Window(lang_gui['prog_win']['title'], layout1)
+    logger.info(lang_gui['logger']['info']['image'], image_path)
 
     # initializing window and progressbar
-    event, values = window.read(timeout=10)
-    window['progbar'].update_bar(0)
+    event, values = prog_win.read(timeout=10)
+    prog_win['progbar'].update_bar(0)
 
     # create instance of ExpertEyeglassesRecommender with window callback to update progressbar
-    ins = ExpertEyeglassesRecommender(image_path, window, logger)
-    window['progbar'].update_bar(100)
+    ins = ExpertEyeglassesRecommender(image_path, prog_win, logger, lang=LANGUAGE)
+    prog_win['progbar'].update_bar(100)
 
     # need to destroy the window as it's still open
-    window.close()
+    prog_win.close()
 
     # convert image to base64-encoded string, it is necessary to visualize in the main interface
     is_success, buffer = cv2.imencode('.png', cv2.resize(ins._image, (256, 256)))
-    logger.debug('Image convertion code: %d', is_success)
+    logger.debug(lang_gui['logger']['debug']['base64'], is_success)
     b_io = BytesIO(buffer)
     b_io.seek(0)
     b64string = base64.b64encode(b_io.read())
 
     # layout for main window
-    layout2 = [[sg.Text('Экспертная рекомендация оправ', font=BIG_FONT)],
-               [sg.Input(key='file', visible=False, enable_events=True),
-                sg.FileBrowse('Обновить изображение'),
-                button_element('Выделение признаков лица')],
-               [button_element('Составление признаков оправы'),
-                button_element('Вывод описания системы')],
-               [sg.Image(data=b64string, size=(256, 256), pad=(64, 64), key='face_image')],
-               [button_element('Сохранить'),
-                button_element('Подбор оправ по базе'),
-                button_element('Сгенерировать индивидуальную оправу')]]
+    layout2 = [[sg.Column([[sg.Text(lang_gui['layout2']['header'], font=BIG_FONT)],
+                           [sg.Input(visible=False, enable_events=True, key='file'),
+                            sg.FileBrowse(lang_gui['layout2']['update']),
+                            button_element(lang_gui['layout2']['extract'], key='extract')],
+                           [button_element(lang_gui['layout2']['translate'], key='translate'),
+                            button_element(lang_gui['layout2']['explain'], key='explain')],
+                           [sg.Image(data=b64string, size=(256, 256),
+                                     pad=(64, 64), key='face_image')],
+                           [button_element(lang_gui['layout2']['save'], key='save'),
+                            button_element(lang_gui['layout2']['recommend'], key='recommend'),
+                            button_element(lang_gui['layout2']['generate'], key='generate')]])]]
 
     # creating main interface
-    window = sg.Window('Экспертная рекомендация оправ',
-                       layout2, resizable=True,
-                       grab_anywhere=True, font=SMALL_FONT)
+    main_win = sg.Window(lang_gui['main_win']['title'],
+                         layout2, resizable=True,
+                         grab_anywhere=True, font=SMALL_FONT)
 
     # graphical interface work in synchronous mode so we need to wait
     # for each event or command in infinite loop
     while True:
-        event, values = window.read()
+        event, values = main_win.read()
         # updating image scenario
         if event == 'file':
             try:
                 image_path = values['file']
                 # checking if no file was chosen
                 if image_path is not None and image_path != '':
-                    logger.info('Image to process: %s', image_path)
+                    logger.info(lang_gui['logger']['info']['process'], image_path)
                     # update current image in expert module
                     ins.update_image(image_path)
                     # call to expert module, all vectors will be calculated at this step
@@ -149,32 +183,32 @@ if __name__ == '__main__':
                     # convert image to base64-encoded string, it is necessary to visualize
                     # in the main interface
                     is_success, buffer = cv2.imencode('.png', cv2.resize(ins._image, (256, 256)))
-                    logger.debug('Image convertion code: %d', is_success)
+                    logger.debug(lang_gui['logger']['debug']['base64'], is_success)
                     b_io = BytesIO(buffer)
                     b_io.seek(0)
                     b64string = base64.b64encode(b_io.read())
                     # update image in the interface
-                    window['face_image'].update(data=b64string, size=(256, 256))
+                    main_win['face_image'].update(data=b64string, size=(256, 256))
             except Exception as exception:
-                logger.error('Updating image error: %s', exception)
+                logger.error(lang_gui['logger']['error']['update_image'], exception)
         # extracting facial features and update them if necessary
-        elif event == 'Выделение признаков лица':
+        elif event == 'extract':
             # get current face vector from expert module
             face_vector = ins.get_facevector()
-            logger.info('Extracted face vector: %s', face_vector)
+            logger.info(lang_gui['logger']['info']['extract'], face_vector)
             try:
                 # layout for face features interface; initialize them here
                 # because of the default values of classifiers predictions
-                col1 = [[text_element_left('Пропорции лица')],
-                        [text_element_left('Наличие бороды')],
-                        [text_element_left('Выраженные скулы')],
-                        [text_element_left('Толщина бровей')],
-                        [text_element_left('Нос')],
-                        [text_element_left('Цвет глаз')],
-                        [text_element_left('Чёлка')],
-                        [text_element_left('Цвет волос')],
-                        [text_element_left('Наличие усов')],
-                        [text_element_left('Бледность кожи')]]
+                col1 = [[text_element_left(lang_gui['facelayout']['col1']['proprotions'])],
+                        [text_element_left(lang_gui['facelayout']['col1']['beard'])],
+                        [text_element_left(lang_gui['facelayout']['col1']['cheeckbones'])],
+                        [text_element_left(lang_gui['facelayout']['col1']['eyebrowthick'])],
+                        [text_element_left(lang_gui['facelayout']['col1']['nose'])],
+                        [text_element_left(lang_gui['facelayout']['col1']['eyes'])],
+                        [text_element_left(lang_gui['facelayout']['col1']['bangs'])],
+                        [text_element_left(lang_gui['facelayout']['col1']['haircolor'])],
+                        [text_element_left(lang_gui['facelayout']['col1']['mustache'])],
+                        [text_element_left(lang_gui['facelayout']['col1']['paleskin'])]]
                 col2 = [[combo_element(key='ratio',
                                        values=('normal', 'wider', 'longer'),
                                        default_value=face_vector['ratio'])],
@@ -196,7 +230,7 @@ if __name__ == '__main__':
                         [combo_element(key='bangs', values=('yes', 'no'),
                                        default_value=face_vector['bangs'])],
                         [combo_element(key='hair',
-                                       values=('black', 'brown', 'gray', 'blonde', 'red'),
+                                       values=('black', 'brown', 'grey', 'blonde', 'red'),
                                        default_value=face_vector['hair'])],
                         [combo_element(key='mustache',
                                        values=('yes', 'no'),
@@ -204,16 +238,16 @@ if __name__ == '__main__':
                         [combo_element(key='paleskin',
                                        values=('yes', 'no'),
                                        default_value=face_vector['paleskin'])]]
-                col3 = [[text_element_right('Форма челюсти')],
-                        [text_element_right('Двойной подбородок')],
-                        [text_element_right('Полнота')],
-                        [text_element_right('Форма бровей')],
-                        [text_element_right('Узкие глаза')],
-                        [text_element_right('Лоб')],
-                        [text_element_right('Губы')],
-                        [text_element_right('Наличие залысин')],
-                        [text_element_right('Оттенок кожи')],
-                        [text_element_right('Пол')]]
+                col3 = [[text_element_right(lang_gui['facelayout']['col3']['jawtype'])],
+                        [text_element_right(lang_gui['facelayout']['col3']['doublechin'])],
+                        [text_element_right(lang_gui['facelayout']['col3']['chubby'])],
+                        [text_element_right(lang_gui['facelayout']['col3']['eyebrowshape'])],
+                        [text_element_right(lang_gui['facelayout']['col3']['narrow_eyes'])],
+                        [text_element_right(lang_gui['facelayout']['col3']['forehead'])],
+                        [text_element_right(lang_gui['facelayout']['col3']['lips'])],
+                        [text_element_right(lang_gui['facelayout']['col3']['bald'])],
+                        [text_element_right(lang_gui['facelayout']['col3']['skintone'])],
+                        [text_element_right(lang_gui['facelayout']['col3']['sex'])]]
                 col4 = [[combo_element(key='jawtype',
                                        values=('soft', 'angular'),
                                        default_value=face_vector['jawtype'])],
@@ -245,61 +279,61 @@ if __name__ == '__main__':
                                        values=('female', 'male'),
                                        default_value=face_vector['gender'])]]
                 cols = [col1, col2, col3, col4]
-                facelayout = [[sg.Text('Редактирование лицевых признаков при необходимости',
+                facelayout = [[sg.Text(lang_gui['facelayout']['header'],
                                        font=BIG_FONT)],
                               [sg.Column(col) for col in cols],
-                              [button_element('Сохранить изменения')]]
+                              [button_element(lang_gui['facelayout']['save'])]]
 
                 # create window for correcting images
-                tmp_win = sg.Window('Лицевые признаки', facelayout, auto_size_text=True,
-                                    grab_anywhere=True, font=SMALL_FONT).Finalize()
-                face_events, face_values = tmp_win.read()
-                tmp_win.close()
-                logger.debug('Triggered face event: %s', face_events)
-                logger.info('Changed face values: %s', face_values)
+                face_win = sg.Window(lang_gui['face_win']['title'], facelayout,
+                                     auto_size_text=True, grab_anywhere=True, font=SMALL_FONT
+                                    ).Finalize()
+                face_events, face_values = face_win.read()
+                face_win.close()
+                logger.debug(lang_gui['logger']['debug']['face_events'], face_events)
+                logger.info(lang_gui['logger']['info']['new_face'], face_values)
                 for k, v in face_values.items():
                     if k in face_vector:
                         face_vector[k] = v
                 # update face vector of corresponding image
                 ins.update_facevector(face_vector)
             except Exception as exception:
-                logger.error('Extracting and editing face vector error: %s', exception)
+                logger.error(lang_gui['logger']['error']['extracting_editing'], exception)
         # converting facial features to eyeglasses features
-        elif event == 'Составление признаков оправы':
+        elif event == 'translate':
             ins.expert_module()
         # save already processed results
-        elif event == 'Сохранить':
+        elif event == 'save':
             ins.save()
         # eyeglasses recommendation's explanation module
-        elif event == 'Вывод описания системы':
+        elif event == 'explain':
             try:
                 descr = ins.description
             except AttributeError:
-                logger.info('No description, creating new one...')
+                logger.info(lang_gui['logger']['info']['no_description'])
                 ins.expert_module()
                 descr = ins.description
-            logger.info('Explanation of expert system: %s', descr)
+            logger.info(lang_gui['logger']['info']['explanation'], descr)
             # layout for explanation window
-            descrlayout = [[sg.Text('Описание рекомендательной системы', font=BIG_FONT)],
-                           [button_element('Ок')],
+            descrlayout = [[sg.Text(lang_gui['descrlayout']['header'], font=BIG_FONT)],
+                           [button_element(lang_gui['descrlayout']['ok'])],
                            [sg.Column([[sg.Text(descr, font=TINY_FONT, auto_size_text=True)]],
                                       scrollable=True)]]
             # layout for explanation window
-            tmp_win = sg.Window('Описание экспертной рекомендации',
-                                descrlayout, auto_size_text=True,
-                                grab_anywhere=True, font=SMALL_FONT
-                                ).Finalize()
+            explain_win = sg.Window(lang_gui['explain_win']['title'],
+                                    descrlayout, auto_size_text=True,
+                                    grab_anywhere=True, font=SMALL_FONT).Finalize()
             # Ok or close button pressed
-            _ = tmp_win.read()
-            tmp_win.close()
+            _ = explain_win.read()
+            explain_win.close()
         # top-6 most suitable eyeglasses
-        elif event == 'Подбор оправ по базе':
+        elif event == 'recommend':
             ins.plot_recommendations(block=False)
         # unique eyeglasses with the help of GANs
-        elif event == 'Сгенерировать индивидуальную оправу':
+        elif event == 'generate':
             ins.generate_unique(block=False)
         # exit button or other unexpected user behavior
         else:
-            window.close()
+            main_win.close()
             # breaking infinite loop, finishing program
             break
