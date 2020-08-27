@@ -1,0 +1,305 @@
+{
+    "gui": {
+        "layout0": {
+            "chose": "Choose an image with face",
+            "lang_text": "Language",
+            "open": "Open"
+        },
+        "layout1": {
+            "header": "Loading..."
+        },
+        "layout2": {
+            "header": "Expert eyeglasses recommendation system",
+            "update": "Update image",
+            "extract": "Extract facial features",
+            "translate": "Make eyeglasses vector",
+            "explain": "Explanation of recommendation module",
+            "save": "Save",
+            "recommend": "Search in database",
+            "generate": "Generate unique frames"
+        },
+        "facelayout": {
+            "header": "Edit facial features if needed",
+            "col1": {
+                "proprotions": "Face ratio",
+                "beard": "Beard",
+                "cheeckbones": "High cheeckbones",
+                "eyebrowthick": "Eyebrow's thickness",
+                "nose": "Nose",
+                "eyes": "Iris color",
+                "bangs": "Bangs",
+                "haircolor": "Haircolor",
+                "mustache": "Mustache",
+                "paleskin": "Pale skin"
+            },
+            "col3": {
+                "jawtype": "Jaw type",
+                "doublechin": "Double chin",
+                "chubby": "Chubby",
+                "eyebrowshape": "Eyebrow's shape",
+                "narrow_eyes": "Narrow eyes",
+                "forehead": "Forehead",
+                "lips": "Lips",
+                "bald": "Baldness",
+                "skintone": "Skintone",
+                "sex": "Sex"
+            },
+            "save": "Save changes"
+        },
+        "descrlayout": {
+            "header": "Explanation of recommendations",
+            "ok": "Ok"
+        },
+        "start_win": {
+            "title": "Start window"
+        },
+        "prog_win": {
+            "title": "Loading modules"
+        },
+        "main_win": {
+            "title": "Expert eyeglasses recommendations"
+        },
+        "face_win": {
+            "title": "Facial features"
+        },
+        "explain_win": {
+            "title": "Explanation of recommendations"
+        },
+        "logger": {
+            "error": {
+                "no_image": "Image wasn't chosen! Exiting...",
+                "update_image": "An error occured while updating an image: %s",
+                "extracting_editing": "An error occured while extracting/editing a facevector: %s"
+            },
+            "info": {
+                "image": "Image: %s",
+                "process": "Processing: %s",
+                "extract": "Extracted face vector: %s",
+                "new_face": "New face vector: %s",
+                "no_description": "No description, creating new one...",
+                "explanation": "Explanation of expert system: %s"
+            },
+            "debug": {
+                "base64": "Image convertion code: %d",
+                "face_events": "Triggered face event: %s"
+            }
+        }
+    },
+    "explanation": {
+        "faceshape": {
+            "header": "Face shape:\n",
+            "oval": {
+                "prefix": "\tOval by ",
+                "description": "\t\tThin frames are not the best choice (make you look wider), basically all frames are good. It is worth paying attention to the frames of square shape, rectangular, aviators. It is better to avoid frames that are too large or too small. Rim and semi-rim frames are a good choice for a long face. Any color suits you.\n"
+            },
+            "triangle": {
+                "prefix": "\tTriangle by ",
+                "description": "\t\tIt is worth paying attention to the cat-eye frames, Clubmasters, round. Thin metal or plastic frames will suit you. It's better to avoid frames with dark shades. Light colors will suit you. Also consider the option of transparent plastic frames.\n"
+            },
+            "oblong": {
+                "prefix": "\tOblong by ",
+                "description": "\t\tIt is worth paying attention to the round-shaped frames and aviators. For greater harmony, it is recommended to consider frames that are elongated in height rather than in width. Try frames where the color of the temples differs from the main color.\n"
+            },
+            "heart": {
+                "prefix": "\tHeart by ",
+                "description": "\t\tYou have a pointed chin. For harmony, it is better to choose bottom-heavy frames. Experiment with the retro style. You should pay attention to the oval, clubmaster, aviators frames. It is better to avoid narrowing and very thin models. Light, light colors, shades of brown will suit you.\n"
+            },
+            "diamond": {
+                "prefix": "\tDiamond by ",
+                "description": "\t\tThis face shape is rare and balanced. To emphasize certain features, consider cat-eye frames, clubmasters, and oval frames. It is better to avoid frames that are too large or too small. It is better to avoid bottom-heavy models. Consider the option of metal semi-rim frames. Shades of brown and black will suit you. And try frames with a dark top.\n"
+            },
+            "round": {
+                "prefix": "\tRound by ",
+                "description": "\t\tIt is worth paying attention to the cat-eye frames, rectangular, square and angular in generall. It is better to avoid round, oval, not elongated and thick frames. Consider the option of rim and semi-rim models. Suitable shades of brown and black. And try frames with prints.\n"
+            },
+            "square": {
+                "prefix": "\tSquare by ",
+                "description": "\t\tIt is worth paying attention to the frames of round, oval shape, and smoothed curves. It is better to avoid square and rectangular frames, which attract attention to the jaw. Consider the option of wide plastic frames. Experiment with colors, try bright prints.\n"
+            },
+            "rectangle": {
+                "prefix": "\tRectangle by ",
+                "description": "\t\tYou should pay attention to round frames, aviators, frames with smooth curves. For greater harmony, it is recommended to consider frames that are elongated in height rather than in width. Try frames where the color of temples differs from the main color.\n"
+            }
+        },
+        "faceratio": {
+            "header": "Face ratio:\n",
+            "wider": {
+                "prefix": "\tWider\n",
+                "description": "\t\tFrames that are elongated in width will suit you.\n"
+            },
+            "longer": {
+                "prefix": "\tLonger\n",
+                "description": "\t\tFrames that are elongated in height will suit you.\n"
+            },
+            "normal": {
+                "prefix": "\tBalanced\n",
+                "description": "\t\t\n"
+            }
+        },
+        "jawtype": {
+            "header": "Jaw shape:\n",
+            "soft": {
+                "prefix": "\tSoft\n",
+                "description": "\t\tAngular frames will be the best choice.\n"
+            },
+            "defined": {
+                "prefix": "\tDefined\n",
+                "description": "\t\tSoft curved frames will be the best choice.\n"
+            },
+            "beard": {
+                "prefix": "\tHas beard\n",
+                "description": "\t\tThe beard shifts the emphasis down, it is recommended to consider top-heavy models.\n"
+            }
+        },
+        "eyebrows": {
+            "header": "Eyebrows:\n",
+            "thick": {
+                "prefix": "\tThick\n",
+                "description": "\t\tThick fullrim frames will look comical with thick eyebrows.\n"
+            },
+            "thin": {
+                "prefix": "\tThin\n",
+                "description": "\t\tThick frames will highlight the eye area.\n"
+            },
+            "flat": {
+                "prefix": "\tFlat line\n",
+                "description": "\t\tThe shape of the upper part of the frame should follow the line of the eyebrows.\n"
+            },
+            "curly": {
+                "prefix": "\tCurly line\n",
+                "description": "\t\tThe shape of the upper part of the frame should follow the line of the eyebrows.\n"
+            },
+            "roof": {
+                "prefix": "\tBrow line like a roof\n",
+                "description": "\t\tThe shape of the upper part of the frame should follow the line of the eyebrows.\n"
+            },
+            "angry": {
+                "prefix": "\tFrowning brow line\n",
+                "description": "\t\tThe shape of the upper part of the frame should follow the line of the eyebrows.\n"
+            }
+        },
+        "nose": {
+            "header": "Nose size:\n",
+            "big": {
+                "prefix": "\tLarge\n",
+                "description": "\t\tThick frames will help shift attention from a large nose. The absence of nosepads will play in favor.\n"
+            },
+            "long": {
+                "prefix": "\tLong\n",
+                "description": "\t\tThick frames will help shift attention from a long nose. The absence of nosepads will play in favor.\n"
+            },
+            "small": {
+                "prefix": "\tSmall\n",
+                "description": "\t\tМожно смело рассматривать модели с носоупорами. Полуобоковые и безободковые оправы стоят рассмотрения.\n"
+            }
+        },
+        "eyes": {
+            "header": "Eyes:\n",
+            "narrow": {
+                "prefix": "\tNarrow eye section:\n",
+                "description": "\t\tFor a narrow cut of the eyes, it is better to choose large, not too thick frames. Dark shades are not the best choice.\n"
+            },
+            "brown": {
+                "prefix": "\tHazel/Brown\n",
+                "description": "\t\tSuitable models has brown, blue, dark green, and light shades. Also consider the option of transparent plastic frames.\n"
+            },
+            "blue": {
+                "prefix": "\tBlue\n",
+                "description": "\t\tSuitable models has blue, orange, and red shades. Also consider the option of transparent plastic frames.\n"
+            },
+            "gray": {
+                "prefix": "\tGray\n",
+                "description": "\t\tAny color will look great on you.\n"
+            },
+            "green": {
+                "prefix": "\tGreen\n",
+                "description": "\t\tBright, light colors will look great on you. Also consider the option of transparent plastic frames.\n"
+            }
+        },
+        "forehead": {
+            "header": "Forehead:\n",
+            "big": {
+                "prefix": "\tBig\n",
+                "description": "\t\tThick rim frames will help you shift the accent from your forehead.\n"
+            },
+            "small": {
+                "prefix": "\tSmall or is hidden behind the bangs\n",
+                "description": "\t\tConsider examining not very thick frames.\n"
+            }
+        },
+        "lips": {
+            "header": "Lips:\n",
+            "big": {
+                "prefix": "\tBig\n",
+                "description": "\t\tThick rim frames will help you shift the accent from your lips.\n"
+            },
+            "normal": {
+                "prefix": "\tNormal\n",
+                "description": "\t\tConsider examining not very thick frames.\n"
+            }
+        },
+        "hair": {
+            "header": "Hair:\n",
+            "bald": {
+                "prefix": "\tThere is a receding hairline or no hair\n",
+                "description": "\t\tThick black frames with a flat top will suit you.\n"
+            },
+            "haircolor": {
+                "black": {
+                    "prefix": "\tBlack\n",
+                    "description": "\t\tMetal frames with dark and shiny shades. Also consider the option of transparent plastic frames.\n"
+                },
+                "blonde": {
+                    "prefix": "\tBlonde\n",
+                    "description": "\t\tGold, white and other bright colors will suit you.\n"
+                },
+                "brown": {
+                    "prefix": "\tBrown\n",
+                    "description": "\t\tAny colors will suit you.\n"
+                },
+                "grey": {
+                    "prefix": "\tGrey\n",
+                    "description": "\t\tMetalic, black, brown and purple frames will suit you.\n"
+                },
+                "red": {
+                    "prefix": "\tGinger\n",
+                    "description": "\t\tGold, green, red, white, blue - these bright colors will suit you.\n"
+                }
+            }
+        },
+        "skintone": {
+            "header": "Skin tone:\n",
+            "warm": {
+                "prefix": "\tWarm\n",
+                "description": "\t\tWarm colors and frames with gold will suit you\n"
+            },
+            "neutral": {
+                "prefix": "\tNeutral\n",
+                "description": "\t\tAny colors will suit you.\n"
+            },
+            "cool": {
+                "prefix": "\tCool\n",
+                "description": "\t\tCool colors and frames with silver will suit you.\n"
+            },
+            "black": {
+                "prefix": "\tEbony\n",
+                "description": "\t\tA great idea would be to use contrast tones to your skin: light and transparent frames.\n"
+            },
+            "pale": {
+                "prefix": "\tPale\n",
+                "description": "\t\tA great idea would be to use contrast tones to your skin: black, brown models. Also consider the option of transparent plastic frames. Rimless frames are not the best choice. They will make you look older.\n"
+            }
+        },
+        "sex": {
+            "header": "Sex:\n",
+            "female": {
+                "prefix": "\tFemale\n",
+                "description": "\t\tAccording to the research, women prefer fullrim plastic glasses.\n"
+            },
+            "male": {
+                "prefix": "\tMale\n",
+                "description": "\t\tAccording to the research, men prefer semirim or rimless metalic glasses.\n"
+            }
+        }
+    }
+}
