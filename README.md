@@ -127,6 +127,9 @@ from expert_backend import ExpertEyeglassesRecommender
 After that create an instance of this class with a specified path to the image:
 ```Python
 ins = ExpertEyeglassesRecommender('test.jpg')
+
+# by passing a `lang` parameter you can specify language, which will be used at explanation step
+ins = ExpertEyeglassesRecommender('test.jpg', lang='en')
 ```
 Initialization of class may take quite a long time (from 30 second up to 2 minutes). 
 ____
@@ -165,7 +168,6 @@ To get explanation of the system try:
 ```Python
 print(ins.description)
 ```
-__In the current version the only possible language for description is russian!__
 ____
 
 To work with new image use:
@@ -190,8 +192,6 @@ Will generate eyeglasses according to features, plot it with matplotlib if show 
 ____
 
 ### GUI
-
-__In the current version the only possible language for interface is russian!__
 
 <p align="center">
 <img src="assets/gui.png">
