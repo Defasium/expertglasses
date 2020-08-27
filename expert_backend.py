@@ -155,9 +155,8 @@ class ExpertEyeglassesRecommender:
         self._vectors = dict()
         self._logger = logger
         self._verbose = verbose
-        self._session = None#tf.Session()
-        self._session = None#tf.Session()
-        self._graph = None#tf.get_default_graph()
+        self._session = tf.Session()
+        self._graph = tf.get_default_graph()
         self._prefix = os.path.dirname(os.path.abspath(__file__))
         self._face_vector = None
         self.eyeglasses_shape_vector = None
@@ -191,7 +190,7 @@ class ExpertEyeglassesRecommender:
         models_path = os.path.join(self._prefix, 'models/')
 
         # for each pretrained model construct necessary architecture and load weights
-        for model in sorted(os.listdir(self._models_path)):
+        for model in sorted(os.listdir(models_path)):
             if self._logger is not None:
                 self._logger.info('Loading model: %s', model)
             # TODO; change string methods to regex patterns
@@ -338,12 +337,14 @@ class ExpertEyeglassesRecommender:
         colorvec = np.clip(colorvec, -0.1, 1.0).reshape(1, -1)
 
         # generate image from noise, models[-1] is SRGAN, while models[-2] is CGAN
-        image = tf.keras.backend.get_session().run(
-            resolve_single(self._models[-1],
-                           (-self._models[-2] \
-                            .predict([np.random.randn(1, 50),
-                                      np.concatenate([shapevec, colorvec], axis=1)]
-                                     )[0]) * 127.5 + 127.5))
+        with self._graph.as_default():
+            with self._session.as_default() as sess:
+                image = sess.run(
+                    resolve_single(self._models[-1],
+                                   (-self._models[-2] \
+                                    .predict([np.random.randn(1, 50),
+                                              np.concatenate([shapevec, colorvec], axis=1)]
+                                             )[0]) * 127.5 + 127.5))
 
         # assign flipped second half of image to first half to utilize asymmetry
         image[:, :127] = image[:, -1:128:-1]
